@@ -1,10 +1,6 @@
 ## refactoring
 
-require fabric from "fiera.js"
-
 remove png-js . use pngjs instead in pdfkit.
-
-
 
 !IMPORTANT
 ---
@@ -17,16 +13,9 @@ text aligned to center looks different on PDF. text slightly moved to the right.
 test: simplysay-inlay.json
  
  
-ToolbarButton "active" property doesnt work
----
- 
-when click "remove" button canvas do not rerender on simplysay.inlay
----
 
-SimHei ignored ondemo-fonts
+SimHei ignored on demo-fonts
 ---
-
-
 
 installable fonts IE11
 ---
@@ -54,7 +43,7 @@ For Cross-browser compatibility use all the font formats not just ttf.
 
 
 
-?INFO Difference in ctx.measureText
+INFO Difference in ctx.measureText
 ---
 Problem: Different text split text lines results possible.
 Words Length Measurments Comaprison:

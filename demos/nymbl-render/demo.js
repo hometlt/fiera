@@ -49,9 +49,9 @@ fabric.initialize({
         FmTransformations,
         FmBufferRendering
     ],
-    libRoot: "../../lib/",
-    mediaRoot: "./../fiera-media/",
-    fontsRoot: "./../fiera-media/fonts/",
+    libRoot: "./../../lib/",
+    mediaRoot: "http://cdn.hometlt.ru/",
+    fontsRoot: "http://cdn.hometlt.ru/fonts/",
     inlineSVG: true
 })
 

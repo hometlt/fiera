@@ -1,5 +1,7 @@
 # Changelog
 
+## [2020.11.18]
+
 ## [2020.03.03]
 - **breaking**: options states setters/getter refactoring
 - refactoring: moved plugins library outside of src
