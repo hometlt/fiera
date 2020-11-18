@@ -5,7 +5,7 @@
   "name": "fiera",
   "version": "20.11.18",
   "description": "Фиера - конструктор презентаций и графических редакторов",
-  "main": "dist/fiera-node.js",
+  "main": "src/fiera.node.js",
   "directories": {
     "lib": "lib"
   },
