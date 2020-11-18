@@ -1,0 +1,170 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+import { Context } from '../context/context';
+import { defaultBoundingBox } from '../utils/bbox';
+import { getAttribute, nodeIs, svgNodeIsVisible } from '../utils/node';
+import { GraphicsNode } from './graphicsnode';
+import { computeViewBoxTransform } from '../utils/transform';
+import { parseFloats } from '../utils/parsing';
+import { Symbol } from './symbol';
+import { Viewport } from '../context/viewport';
+/**
+ * Draws the element referenced by a use node, makes use of pdf's XObjects/FormObjects so nodes are only written once
+ * to the pdf document. This highly reduces the file size and computation time.
+ */
+var Use = /** @class */ (function (_super) {
+    __extends(Use, _super);
+    function Use() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Use.prototype.renderCore = function (context) {
+        return __awaiter(this, void 0, void 0, function () {
+            var pf, url, id, refNode, refNodeOpensViewport, x, y, width, height, t, viewBox, refContext;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        pf = parseFloat;
+                        url = this.element.getAttribute('href') || this.element.getAttribute('xlink:href');
+                        // just in case someone has the idea to use empty use-tags, wtf???
+                        if (!url)
+                            return [2 /*return*/];
+                        id = url.substring(1);
+                        refNode = context.refsHandler.get(id);
+                        refNodeOpensViewport = nodeIs(refNode.element, 'symbol,svg') && refNode.element.hasAttribute('viewBox');
+                        x = pf(getAttribute(this.element, context.styleSheets, 'x') || '0');
+                        y = pf(getAttribute(this.element, context.styleSheets, 'y') || '0');
+                        width = undefined;
+                        height = undefined;
+                        if (refNodeOpensViewport) {
+                            //  <use> inherits width/height only to svg/symbol
+                            // if there is no viewBox attribute, width/height don't have an effect
+                            // in theory, the default value for width/height is 100%, but we currently don't support this
+                            width = pf(getAttribute(this.element, context.styleSheets, 'width') ||
+                                getAttribute(refNode.element, context.styleSheets, 'width') ||
+                                '0');
+                            height = pf(getAttribute(this.element, context.styleSheets, 'height') ||
+                                getAttribute(refNode.element, context.styleSheets, 'height') ||
+                                '0');
+                            //  accumulate x/y to calculate the viewBox transform
+                            x += pf(getAttribute(refNode.element, context.styleSheets, 'x') || '0');
+                            y += pf(getAttribute(refNode.element, context.styleSheets, 'y') || '0');
+                            viewBox = parseFloats(refNode.element.getAttribute('viewBox'));
+                            t = computeViewBoxTransform(refNode.element, viewBox, x, y, width, height, context);
+                        }
+                        else {
+                            t = context.pdf.Matrix(1, 0, 0, 1, x, y);
+                        }
+                        refContext = new Context(context.pdf, {
+                            refsHandler: context.refsHandler,
+                            styleSheets: context.styleSheets,
+                            withinUse: true,
+                            viewport: refNodeOpensViewport ? new Viewport(width, height) : context.viewport,
+                            svg2pdfParameters: context.svg2pdfParameters
+                        });
+                        return [4 /*yield*/, context.refsHandler.getRendered(id, function (node) { return Use.renderReferencedNode(node, refContext); })];
+                    case 1:
+                        _a.sent();
+                        context.pdf.saveGraphicsState();
+                        context.pdf.setCurrentTransformationMatrix(context.transform);
+                        //  apply the bbox (i.e. clip) if needed
+                        if (refNodeOpensViewport &&
+                            getAttribute(refNode.element, context.styleSheets, 'overflow') !== 'visible') {
+                            context.pdf.rect(x, y, width, height);
+                            context.pdf.clip().discardPath();
+                        }
+                        context.pdf.doFormObject(id, t);
+                        context.pdf.restoreGraphicsState();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Use.renderReferencedNode = function (node, refContext) {
+        return __awaiter(this, void 0, void 0, function () {
+            var bBox;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        bBox = node.getBoundingBox(refContext);
+                        // The content of a PDF form object is implicitly clipped at its /BBox property.
+                        // SVG, however, applies its clip rect at the <use> attribute, which may modify it.
+                        // So, make the bBox a lot larger than it needs to be and hope any thick strokes are
+                        // still within.
+                        bBox = [bBox[0] - 0.5 * bBox[2], bBox[1] - 0.5 * bBox[3], bBox[2] * 2, bBox[3] * 2];
+                        refContext.pdf.beginFormObject(bBox[0], bBox[1], bBox[2], bBox[3], refContext.pdf.unitMatrix);
+                        if (!(node instanceof Symbol)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, node.apply(refContext)];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, node.render(refContext)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4:
+                        refContext.pdf.endFormObject(node.element.getAttribute('id'));
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Use.prototype.getBoundingBoxCore = function (context) {
+        return defaultBoundingBox(this.element, context);
+    };
+    Use.prototype.isVisible = function (parentVisible, context) {
+        return svgNodeIsVisible(this, parentVisible, context);
+    };
+    Use.prototype.computeNodeTransformCore = function (context) {
+        return context.pdf.unitMatrix;
+    };
+    return Use;
+}(GraphicsNode));
+export { Use };
+//# sourceMappingURL=use.js.map

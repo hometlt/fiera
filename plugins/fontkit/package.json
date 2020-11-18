@@ -1,0 +1,76 @@
+{
+  "type": "module",
+  "name": "fontkit",
+  "version": "1.8.1",
+  "description": "An advanced font engine for Node and the browser",
+  "keywords": [
+    "opentype",
+    "font",
+    "typography",
+    "subset",
+    "emoji",
+    "glyph",
+    "layout"
+  ],
+  "scripts": {
+    "test": "mocha",
+    "prepublish": "run-s clean trie:** rollup:**",
+    "trie:data": "babel-node src/opentype/shapers/generate-data.js",
+    "trie:use": "babel-node src/opentype/shapers/gen-use.js",
+    "trie:indic": "babel-node src/opentype/shapers/gen-indic.js",
+    "trie:copy": "shx cp src/opentype/shapers/*.trie ./",
+    "rollup:index": "rollup -c -m -i src/index.js -o index.js",
+    "rollup:base": "rollup -c -m -i src/base.js -o base.js",
+    "clean": "shx rm -f index.js base.js data.trie indic.trie use.trie src/opentype/shapers/data.trie src/opentype/shapers/use.trie src/opentype/shapers/use.json src/opentype/shapers/indic.trie src/opentype/shapers/indic.json",
+    "coverage": "cross-env BABEL_ENV=cover nyc mocha"
+  },
+  "main": "index.js",
+  "jsnext:main": "src/index.js",
+  "files": [
+    "src",
+    "base.js",
+    "base.js.map",
+    "index.js",
+    "index.js.map",
+    "data.trie",
+    "use.trie",
+    "indic.trie"
+  ],
+  "author": "Devon Govett <devongovett@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/foliojs/fontkit.git"
+  },
+  "dependencies": {
+    "brotli": "^1.3.2",
+    "clone": "^1.0.1",
+    "deep-equal": "^1.0.0",
+    "dfa": "^1.0.0",
+    "iconv-lite": "^0.4.13",
+    "restructure": "^0.5.4",
+    "tiny-inflate": "^1.0.2",
+    "unicode-trie": "^0.3.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.0",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-proposal-decorators": "^7.10.5",
+    "@babel/preset-env": "^7.11.0",
+    "@babel/preset-es2015": "^7.0.0-beta.53",
+    "@purtuga/esm-webpack-plugin": "^1.2.1",
+    "babel-loader": "^8.1.0",
+    "babel-preset-latest-node": "^4.1.0",
+    "buffer-loader": "^0.1.0",
+    "raw-loader": "^4.0.1",
+    "webpack": "^4.44.1",
+    "codepoints": "^1.2.0"
+  },
+  "browserify": {
+    "transform": [
+      "brfs",
+      "browserify-optional"
+    ]
+  }
+}

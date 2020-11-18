@@ -1,0 +1,1 @@
+{"version":3,"file":"ColorFill.js","sourceRoot":"","sources":["../../../../src/fill/ColorFill.ts"],"names":[],"mappings":"AAKA,MAAM,OAAO,SAAS;IAGpB,YAAY,KAAe;QACzB,IAAI,CAAC,KAAK,GAAG,KAAK,CAAA;IACpB,CAAC;IAED,KAAK,CAAC,WAAW,CAAC,OAAqB,EAAE,OAAgB;QACvD,OAAO,SAAS,CAAA;IAClB,CAAC;CACF"}

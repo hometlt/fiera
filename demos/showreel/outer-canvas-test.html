@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Fabric.js Overflow Test</title>
+    <link rel="stylesheet" href="../css/test.css">
+    <style>
+        body{
+            padding: 20px;
+            display: flex;
+        }
+        #wrap {
+            display: flex;
+            overflow: auto;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(219, 237, 255, 0.75);
+            border: 1px solid white;
+            box-sizing: content-box;
+            flex: 1;
+        }
+        .canvas-container{
+            background: white;
+            box-shadow: 1px 1px 10px rgba(0,0,0,0.5);
+        }
+    </style>
+    <script defer src="fabricjs/fabric.js"></script>
+    <script defer type="module" src="tests/outer-canvas.js"></script>
+</head>
+<body class="bg-animated">
+    <div id="wrap" class="bg-gradient">
+        <canvas id="canvas">Canvas is not supported!</canvas>
+    </div>
+
+</body>
+</html>

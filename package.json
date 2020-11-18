@@ -1,0 +1,81 @@
+{
+  "type": "module",
+  "private": true,
+  "author": "Ponomarev Denis",
+  "name": "fiera",
+  "version": "20.11.18",
+  "description": "Фиера - конструктор презентаций и графических редакторов",
+  "main": "dist/fiera-node.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [
+    "canvas",
+    "graphic",
+    "graphics",
+    "SVG",
+    "node-canvas",
+    "parser",
+    "HTML5",
+    "object model"
+  ],
+  "contributors": [
+    {
+      "name": "Denis Ponomarev",
+      "email": "visceroi@gmail.com",
+      "url": "http://cv.hometlt.ru"
+    }
+  ],
+  "browser": {
+    "canvas": false,
+    "fs": false,
+    "jsdom": false,
+    "jsdom/lib/jsdom/living/generated/utils": false,
+    "jsdom/lib/jsdom/utils": false,
+    "http": false,
+    "https": false,
+    "xmldom": false,
+    "url": false
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=development nodemon demo/server/server.js",
+    "dev": "webpack --mode development",
+    "prod": "webpack --mode production",
+    "babel": "babel --presets es2015 js/main.js -o build/main.bundle.js",
+    "webpack": "webpack",
+    "build-node": "webpack --config ./webpack.config.node.js",
+    "build-demo": "webpack --config ./webpack.config.demo.js -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/ponomarevtlt/fiera-sources.git"
+  },
+  "browse'startrslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "canvas": "git+https://github.com/samizdatco/node-canvas.git#pattern-transform",
+    "fontkit": "^1.8.0",
+    "gl": "^4.5.3",
+    "image-type": "^4.1.0",
+    "jsdom": "15.1.0",
+    "png-js": ">=0.1.0",
+    "pngjs": "^3.4.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.43.0",
+    "webpack-node-externals": "^2.5.2",
+    "babel-loader": "^8.1.0",
+    "babel-preset-next": "^1.4.0"
+  },
+  "license": "ISC"
+}

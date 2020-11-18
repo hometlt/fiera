@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Fiera Objects Flip Test</title>
+    <link rel="stylesheet" href="css/fiera.css">
+    <link rel="stylesheet" href="css/test.css">
+    <script type="module" src="showreel.js"></script>
+    <script type="module">
+        let o = {} ;
+
+        location.search.substr(1).split("&").map(i => i.split("="))
+            .forEach(i => {
+                o[i[0]] = i[1]
+            })
+
+        if(o['test']){
+            import(`./tests/${ o['test']}.js`)
+        }
+        else{
+            document.getElementById("list").style.display = "block"
+        }
+    </script>
+</head>
+<body class="bg-gradient">
+    <div id="list" style="display: none">
+        <ul>
+            <li><a href="?test=canvas">Canvas</a></li>
+            <li><a href="?test=clippath">ClipPath</a></li>
+            <li><a href="?test=common">Common</a></li>
+            <li><a href="?test=controls">Controls</a></li>
+            <li><a href="?test=crop">Crop</a></li>
+            <li><a href="?test=flip">Flip</a></li>
+            <li><a href="?test=image-dpi">Image-DPI</a></li>
+            <li><a href="?test=lock">Lock</a></li>
+            <li><a href="?test=masking-native">masking-native</a></li>
+            <li><a href="?test=masking-fiera">masking-fiera</a></li>
+            <li><a href="?test=nymbl-editor">nymbl-editor.js</a></li>
+            <li><a href="?test=nymbl-print">nymbl-print.js</a></li>
+            <li><a href="?test=outer-canvas">outer-canvas.js</a></li>
+            <li><a href="?test=puzzle">puzzle.js</a></li>
+            <li><a href="?test=ssay">ssay.js</a></li>
+            <li><a href="?test=sticker">sticker.js</a></li>
+            <li><a href="?test=templates">templates.js</a></li>
+            <li><a href="?test=text">text.js</a></li>
+            <li><a href="?test=warp">warp.js</a></li>
+            <li><a href="?test=curved">curved.js</a></li>
+            <li><a href="?test=nymbl-preview">nymbl-preview.js</a></li>
+        </ul>
+    </div>
+<!--    <canvas id="canvas">Canvas is not supported!</canvas>-->
+</body>
+</html>

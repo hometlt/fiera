@@ -1,0 +1,39 @@
+.canvas-container{
+  &.rulers-enabled{
+    margin-top: 15px;
+    margin-left: 15px;
+    &:after {
+      content: "";
+      width: 15px;
+      height: 15px;
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      border: 1px solid lightgray;
+      border-width: 0 1px 1px 0;
+      background: white;
+    }
+  }
+  //.ruler-corner{
+  //  width: 15px;
+  //  height: 15px;
+  //  position: absolute;
+  //  top:-15px;
+  //  left: -15px;
+  //  background: white;
+  //}
+  .ruler-horizontal{
+    background: white;
+    position: absolute;
+    top: -15px;
+    left: 0;
+    right: 0;
+  }
+  .ruler-vertical{
+    background: white;
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left:-15px;
+  }
+}

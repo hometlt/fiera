@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "ESNext",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "lib": ["dom", "es2015"],
+    "outDir": "ts-built",
+    "sourceMap": true
+  },
+  "include": [
+    "./../jspdf/**/*.ts",
+    "src/**/*.ts",
+    "./node_modules/svgpath/index.d.ts",
+    "./node_modules/specificity/specificity.d.ts",
+    "./typings/**/*.ts",
+    "types.d.ts"
+  ]
+}
+

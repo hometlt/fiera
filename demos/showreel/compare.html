@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<img src="your-design-here.png" width="200px" height="200px">
+
+<canvas id="canvas" width="200px" height="200px"></canvas>
+<canvas id="canvas2" width="200px" height="200px"></canvas>
+<canvas id="canvas3" width="200px" height="200px"></canvas>
+<canvas id="canvas4" width="200px" height="200px"></canvas>
+<script>
+
+    function test(id,quality){
+        let canvas= document.getElementById(id)
+        let context = canvas.getContext("2d");
+        if(quality){
+            context.imageSmoothingQuality = quality
+        }
+        else{
+            context.imageSmoothingEnabled = false;
+        }
+
+        let image = new Image();
+        image.src = "your-design-here.png"
+        image.onload = function(){
+            context.drawImage(image,0,0,200,200);
+        }
+    }
+    test("canvas",false)
+    test("canvas2","low")
+    test("canvas3","medium")
+    test("canvas4","high")
+
+    // {
+    //
+    //     let canvas= document.getElementById("canvas2")
+    //     let context = canvas.getContext("2d");
+    //     context.imageSmoothingQuality = "medium";
+    //     let image = new Image();
+    //     image.src = "your-design-here.png"
+    //     image.onload = function(){
+    //         context.drawImage(image,0,0,200,200);
+    //     }
+    // }
+    //
+    // {
+    //
+    //     let canvas= document.getElementById("canvas3")
+    //     let context = canvas.getContext("2d");
+    //     context.imageSmoothingQuality = "high";
+    //     let image = new Image();
+    //     image.src = "your-design-here.png"
+    //     image.onload = function(){
+    //         context.drawImage(image,0,0,200,200);
+    //     }
+    // }
+
+</script>
+</body>
+</html>

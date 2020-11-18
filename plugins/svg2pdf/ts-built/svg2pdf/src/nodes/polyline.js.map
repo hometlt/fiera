@@ -1,0 +1,1 @@
+{"version":3,"file":"polyline.js","sourceRoot":"","sources":["../../../../src/nodes/polyline.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,MAAM,YAAY,CAAA;AAGrC,MAAM,OAAO,QAAS,SAAQ,QAAQ;IACpC,YAAY,IAAa,EAAE,QAAmB;QAC5C,KAAK,CAAC,KAAK,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAA;IAC9B,CAAC;CACF"}

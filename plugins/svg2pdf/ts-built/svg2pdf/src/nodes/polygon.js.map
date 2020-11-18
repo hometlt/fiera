@@ -1,0 +1,1 @@
+{"version":3,"file":"polygon.js","sourceRoot":"","sources":["../../../../src/nodes/polygon.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,MAAM,YAAY,CAAA;AAGrC,MAAM,OAAO,OAAQ,SAAQ,QAAQ;IACnC,YAAY,IAAa,EAAE,QAAmB;QAC5C,KAAK,CAAC,IAAI,EAAE,IAAI,EAAE,QAAQ,CAAC,CAAA;IAC7B,CAAC;CACF"}

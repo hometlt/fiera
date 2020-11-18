@@ -1,0 +1,47 @@
+* {
+  box-sizing: border-box;
+}
+html {
+  overflow: hidden;
+  height: 100%;
+  margin: 0;
+}
+body{
+  height: 100%;
+  margin: 0;
+  overflow: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.tools{
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+}
+.tool {
+  display: inline-flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+.render-area {
+  padding: 20px 40px;
+  box-shadow: inset 1px 1px 10px rgba(0,0,0,0.5);
+  overflow: auto;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(219, 237, 255, 0.75);
+  box-sizing: content-box;
+  flex: 1;
+}
+.canvas-container{
+  background-color: rgb(192 228 255);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+  box-shadow: 1px 1px 10px rgba(0,0,0,0.5);
+}
