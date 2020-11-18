@@ -1,5 +1,4 @@
 
-import './../../plugins/console-debug.js'
 import {FmTarget} from '../core/target.js'
 
 function eventsLogger(options){
