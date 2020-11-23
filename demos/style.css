@@ -1,3 +1,4 @@
+@import "https://pro.fontawesome.com/releases/v5.10.0/css/all.css";
 * {
   box-sizing: border-box;
 }
@@ -83,11 +84,11 @@ body {
   cursor: default;
   opacity: 0.5;
   background-color: lightgrey;
-  color: white;
+  color: grey;
 }
 #tools .tool label input:disabled + .tool-button svg path,
 #tools .tool label input:disabled + .tool-button-icon svg path {
-  fill: white;
+  fill: grey;
 }
 #tools .tool label input:checked + .tool-button,
 #tools .tool label input:checked + .tool-button-icon {

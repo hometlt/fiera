@@ -86,6 +86,9 @@ class SelectTool extends Tool {
             this.input.appendChild(optionElement);
         }
 
+        if(data.options.constructor === Function){
+            data.options = data.options()
+        }
         for (let option of data.options) {
             if(option.constructor === String){
                 let optionElement = document.createElement("option");
@@ -109,6 +112,7 @@ class SelectTool extends Tool {
         this.config.change(this.input.value)
     }
 }
+
 class DropdownTool extends SelectTool {
     create (data) {
         SelectTool.prototype.create.call(this,data)
@@ -119,7 +123,6 @@ class DropdownTool extends SelectTool {
         this.input.value = ""
     }
 }
-
 
 class CheckboxTool extends Tool {
     create(data) {
@@ -228,6 +231,9 @@ class ColorTool extends Tool {
 
 class OptionsTool extends Tool {
     create(data){
+        if(data.options.constructor === Function){
+            data.options = data.options()
+        }
         for(let option of data.options){
             if(option.constructor === String){
                 option = {

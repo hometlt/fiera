@@ -55,7 +55,7 @@ import {FmWebGL} from "../modules/webgl.js";
  */
 export const FmWarp = {
 	name: "warp",
-	deps: [FmWebGL],
+	deps: [FmWebGL,FmControls],
 	// nodeDeps: [WebGL],
 	// nodeDeps: [NodeWebGL],
 	prototypes: {

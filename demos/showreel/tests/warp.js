@@ -8,8 +8,12 @@ let textCtx = debugCanvasElement.getContext("2d");
 textCtx.translate(-0.5,-0.5);
 textCtx.imageSmoothingEnabled = false;
 
+
+import {FmWarp} from "../../../src/shapes/warp.js";
+import {FmSourceCanvas} from "../../../src/images/image.sourceCanvas.js";
+
 new App({
-	plugins: ["warp", "upload", "brushes", "crop", "source-canvas"],
+	plugins: [FmWarp, FmSourceCanvas],
 	prototypes: {
 		Warp:{
 			eventListeners: {
@@ -142,11 +146,11 @@ new App({
 		src: "backgrounds/abstract/BG178.jpg",
 		backgroundPosition: "fill",
 		objects: [
-			"image",
+			// "image",
 			// "nogl",
 			"gl",
-			"warp2",
-			"warp4"
+			// "warp2",
+			// "warp4"
 		]
 	}
 })
