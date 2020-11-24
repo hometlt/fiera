@@ -466,7 +466,7 @@ export const FmTiles = {
 				let matrix = new MatrixClass(transform);
 				let pattern = ctx.createPattern(this._tileCanvas, 'repeat');
 
-				matrix = matrix.translate(this.left,this.top).rotate(this.angle)
+				matrix = matrix.scale(fabric.devicePixelRatio).translate(this.left,this.top).rotate(this.angle)
 
 				if(this.originY === "center"){
 					matrix = matrix.translate( this.height/2 *this.scaleX, 0)
