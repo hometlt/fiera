@@ -163,15 +163,8 @@ export const FmTiles = {
 				this.updateState()
 			},
 			setPuzzlePreset (value){
-
-				this.saveStates(["puzzle"]);
-				if(value){
-					value = camelize(value);
-				}
-				this.setPuzzle(this.puzzlePresets[value])
-				this.puzzlePreset = value;
-				this._update_puzzle();
-				this.updateState()
+				this.puzzlePreset = camelize(value);
+				this.setPuzzle(this.puzzlePresets[this.puzzlePreset])
 			},
 			_update_puzzle (){
 				delete this._puzzles;
@@ -214,9 +207,13 @@ export const FmTiles = {
 				// 	this.canvas.renderAll();
 				// }
 				// //todo use "set" function
+
+
+
 				if (this.canvas) {
 					this.updateTiling();
-					this.canvas.renderAll();
+					this.setClipPath(this.__clipPath); // todo костыль
+					// this.canvas.renderAll();
 				}
 			},
 			render_overwritten: fabric.Object.prototype.render,

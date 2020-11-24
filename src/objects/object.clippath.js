@@ -54,9 +54,9 @@ export const FmCLipPath = {
         //   path.drawObject(ctx, true, transformations)
         // }else{
 
-          path.transform(ctx);
-          ctx.scale(1 / path.zoomX, 1 / path.zoomY);
-          ctx.drawImage(path._cacheCanvas, -path.cacheTranslationX, -path.cacheTranslationY);
+        path.transform(ctx);
+        ctx.scale(1 / path.zoomX, 1 / path.zoomY);
+        ctx.drawImage(path._cacheCanvas, -path.cacheTranslationX, -path.cacheTranslationY);
 
         // }
 
@@ -162,6 +162,7 @@ export const FmCLipPath = {
           callback && callback();
           return;
         }
+        this.__clipPath = clipPath
         //keep default clippath for cropped images
         if(clipPath === true || !clipPath && this.crop){
           clipPath = {};
