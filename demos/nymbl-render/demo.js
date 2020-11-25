@@ -102,6 +102,8 @@ App.create({
             width: 180,
             height: 180,
             top: 200,
+            originX: "center",
+            originY: "center",
             fill: "transparent",
             stroke: "black"
         },
@@ -111,8 +113,6 @@ App.create({
             width: 100,
             height: 100,
             top: 100,
-            originX: "center",
-            originY: "center",
             fill: "black"
         },
         template: {
@@ -242,7 +242,8 @@ App.create({
             sourceRoot: "products/",
         },
         Object: {
-            wholeCoordinates: true,
+            strokeWidth: 0,
+            roundCoordinates: true,
             eventListeners: {
                 "rotated" () {this.canvas.setTooltip(false)},
                 "rotating" () {this.canvas.setTooltip(Math.round(this.angle) + "°")}
@@ -302,7 +303,6 @@ App.create({
             hasBorders: true,
             hasShapeBorders: true,
             subdivisions: 40,
-            strokeWidth: 0,
             sticker: false,
             stickerOptions: {
                 fill: "white",

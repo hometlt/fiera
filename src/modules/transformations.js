@@ -24,12 +24,38 @@ export const FmTransformations = {
         this.roundCoordinates = val;
         this.on("added modified",() => {
           if(this.roundCoordinates){
+
+            //todo should keep strokeWidth in mind.
             this.set({
               left: Math.round(this.left),
               top: Math.round(this.top),
               width: Math.round(this.width),
               height: Math.round(this.height)
             })
+
+            let tDims = this._getTransformedDimensions()
+
+            if(tDims.x % 2 || tDims.y % 2){
+              let nDims = this._getNonTransformedDimensions()
+
+              if(tDims.x % 2 < 1){
+                tDims.x += - tDims.x % 2
+              }
+              else{
+                tDims.x += - tDims.x % 2 + 2
+              }
+              if(tDims.y % 2 < 1){
+                tDims.y += - tDims.y % 2
+              }
+              else{
+                tDims.y += - tDims.y % 2 + 2
+              }
+
+              this.set({
+                scaleX: tDims.x / nDims.x,
+                scaleY: tDims.y / nDims.y
+              })
+            }
           }
         })
       },
@@ -299,10 +325,10 @@ export const FmTransformations = {
       getFixedPosition(target, x, y) {
 
         let _translatedX = 0,
-          _translatedY = 0,
-          _w = this.originalWidth || this.width,
-          _h = this.originalHeight || this.height,
-          scale = this.viewportTransform[0];
+            _translatedY = 0,
+            _w = this.originalWidth || this.width,
+            _h = this.originalHeight || this.height,
+            scale = this.viewportTransform[0];
 
         if (this._currentTransform) {
           _translatedX = x - this._currentTransform.lastX;
@@ -343,10 +369,10 @@ export const FmTransformations = {
         // let limits = rect || this.movementLimits;
 
         let newPos = {},
-          _l = limits.left,
-          _r = limits.right,
-          _t = limits.top,
-          _b = limits.bottom;
+            _l = limits.left,
+            _r = limits.right,
+            _t = limits.top,
+            _b = limits.bottom;
 
         if (target.movementLimitMode === "content") {
           _l -= bounds.width - this.contentOffsets;
@@ -419,7 +445,7 @@ export const FmTransformations = {
        */
       setPositionByOrigin(pos, originX, originY) {
         let center = this.translateToCenterPoint(pos, originX, originY),
-          position = this.translateToOriginPoint(center, this.originX, this.originY);
+            position = this.translateToOriginPoint(center, this.originX, this.originY);
 
         // if (this.wholeCoordinates) {
         //   position.x = Math.round(position.x);
@@ -539,8 +565,8 @@ export const FmTransformations = {
         let _scaled = this._scaleObject_overwritten(x, y, by);
 
         let tr = this._currentTransform,
-          target = tr.target,
-          corner = tr.corner;
+            target = tr.target,
+            corner = tr.corner;
         let _v = this.viewportTransform;
 
         if (!target.movementLimits || target.movementLimitMode !== "contain") {
@@ -843,8 +869,8 @@ export const FmTransformations = {
           }
           if (pos.top !== undefined || pos.left !== undefined) {
             _translated = this._translateObject_overwritten(
-              pos.left !== undefined ? pos.left : x,
-              pos.top !== undefined ? pos.top : y);
+                pos.left !== undefined ? pos.left : x,
+                pos.top !== undefined ? pos.top : y);
           }
           return _translated || pos.scaleX || pos.scaleY;
         }
@@ -912,13 +938,13 @@ export const FmTransformations = {
       _finalizeCurrentTransform: function(e) {
 
         var transform = this._currentTransform,
-          target = transform.target,
-          eventName,
-          options = {
-            e: e,
-            target: target,
-            transform: transform,
-          };
+            target = transform.target,
+            eventName,
+            options = {
+              e: e,
+              target: target,
+              transform: transform,
+            };
 
         if (target._scaling) {
           target._scaling = false;
@@ -976,14 +1002,14 @@ export const FmTransformations = {
 
         if (t.setObjectScale) {
           return t.setObjectScale(localMouse, transform,
-            lockScalingX, lockScalingY, by, lockScalingFlip, _dim);
+              lockScalingX, lockScalingY, by, lockScalingFlip, _dim);
         } else {
           if (t.resizable) {
             return this._setObjectSize(localMouse, transform,
-              lockScalingX, lockScalingY, by, lockScalingFlip, _dim);
+                lockScalingX, lockScalingY, by, lockScalingFlip, _dim);
           } else {
             return this._setObjectScaleOverwritten(localMouse, transform,
-              lockScalingX, lockScalingY, by, lockScalingFlip, _dim);
+                lockScalingX, lockScalingY, by, lockScalingFlip, _dim);
           }
         }
       },
@@ -1029,8 +1055,8 @@ export const FmTransformations = {
       _resizeObjectEqually: function (localMouse, target, transform, _dim) {
 
         let dist = localMouse.y + localMouse.x,
-          lastDist = _dim.y * transform.original.height / target.height +
-            _dim.x * transform.original.width / target.width;
+            lastDist = _dim.y * transform.original.height / target.height +
+                _dim.x * transform.original.width / target.width;
 
         transform.newWidth = transform.original.width * dist / lastDist;
         transform.newHeight = transform.original.height * dist / lastDist;

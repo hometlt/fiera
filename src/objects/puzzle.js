@@ -163,8 +163,9 @@ export const FmTiles = {
 				this.updateState()
 			},
 			setPuzzlePreset (value){
-				this.puzzlePreset = camelize(value);
-				this.setPuzzle(this.puzzlePresets[this.puzzlePreset])
+				let puzzlePreset = camelize(value);
+				this.setPuzzle(this.puzzlePresets[puzzlePreset])
+				this.puzzlePreset = puzzlePreset
 			},
 			_update_puzzle (){
 				delete this._puzzles;
@@ -392,7 +393,6 @@ export const FmTiles = {
 					this._tileBufferContext.clearRect(0,0,this._tileBufferCanvas.width,this._tileBufferCanvas.height)
 					// Restore the transform
 					this._tileBufferContext.restore();
-
 					this._tileBufferContext.save()
 					this._tileBufferContext.translate(offset.x,offset.y)
 					this.drawObject(this._tileBufferContext,false,[]);
@@ -591,23 +591,23 @@ export const FmTiles = {
 
 				this._puzzleOptions.offsetsX.forEach(offset => {
 					xvectorsAbs.push({
-						x: dxAbs.x * offset.x + dyAbs.x * offset.y,
-						y: dxAbs.y * offset.x + dyAbs.y * offset.y
+						x: Math.floor(dxAbs.x * offset.x + dyAbs.x * offset.y),
+						y: Math.floor(dxAbs.y * offset.x + dyAbs.y * offset.y)
 					})
 					xvectorsRel.push({
-						x: dxRel.x * offset.x,
-						y: dxRel.y + dyRel.y * offset.y
+						x: Math.floor(dxRel.x * offset.x),
+						y: Math.floor(dxRel.y + dyRel.y * offset.y)
 					})
 				})
 
 				this._puzzleOptions.offsetsY.forEach(offset => {
 					yvectorsAbs.push({
-						x: dxAbs.x * offset.x + dyAbs.x * offset.y,
-						y: dxAbs.y * offset.x + dyAbs.y * offset.y
+						x: Math.floor(dxAbs.x * offset.x + dyAbs.x * offset.y),
+						y: Math.floor(dxAbs.y * offset.x + dyAbs.y * offset.y)
 					})
 					yvectorsRel.push({
-						x: dyRel.x + dxRel.x * offset.x,
-						y: dyRel.y * offset.y
+						x: Math.floor(dyRel.x + dxRel.x * offset.x),
+						y: Math.floor(dyRel.y * offset.y)
 					})
 				})
 

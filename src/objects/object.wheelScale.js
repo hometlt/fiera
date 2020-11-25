@@ -49,11 +49,22 @@ export const FmWheelScale = {
 
 				let options = {}
 
+
 				if(!this.lockScalingX){
-					options.scaleX = Math.min(this.maxScale, Math.max(this.scaleX * value, this.minScale));
+					if(this.resizable){
+						options.width = this.width * value
+					}
+					else{
+						options.scaleX = Math.min(this.maxScale, Math.max(this.scaleX * value, this.minScale));
+					}
 				}
 				if(!this.lockScalingY){
-					options.scaleY = Math.min(this.maxScale, Math.max(this.scaleY * value, this.minScale))
+					if(this.resizable){
+						options.height = this.height * value
+					}
+					else {
+						options.scaleY = Math.min(this.maxScale, Math.max(this.scaleY * value, this.minScale))
+					}
 				}
 
 				this.set(options);
