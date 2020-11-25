@@ -281,7 +281,10 @@ const CanvasMixin = {
         output.width = size.width;
         output.height = size.height;
         let ctx = output.getContext('2d');
+
+        this.__forExport = true;
         let exported = this.exportImage(Math.max(1,size.scaleX))
+        delete this.__forExport
 
         ctx.imageSmoothingQuality = "high"
         ctx.drawImage(exported,0,0,output.width,output.height)
