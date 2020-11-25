@@ -140,6 +140,7 @@ declare module fabric {
 
     minDpi?: number,
     dpiWarningClass?: string;
+    roundCoordinates?: number;
 
     puzzleSpacingX?: number;
     puzzleSpacingY?: number;

@@ -20,6 +20,19 @@ export const FmTransformations = {
   name: "transformations",
   prototypes: {
     Object: {
+      setRoundCoordinates: function(val){
+        this.roundCoordinates = val;
+        this.on("added modified",() => {
+          if(this.roundCoordinates){
+            this.set({
+              left: Math.round(this.left),
+              top: Math.round(this.top),
+              width: Math.round(this.width),
+              height: Math.round(this.height)
+            })
+          }
+        })
+      },
       movementLimits: null,
       getMovementLimits() {
         return this.movementLimits ? (this.movementLimits.id ? '#' + this.movementLimits.id : this.movementLimits) : null;
