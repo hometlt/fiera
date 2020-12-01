@@ -488,6 +488,7 @@ declare module fabric {
     //todo should not list private functions here
     _setShadow (ctx: CanvasRenderingContext2D, object : IObject);
     calcTransformMatrix: any;
+    updateClipPath: () => void
   }
 
   export interface IRect extends IObject {
