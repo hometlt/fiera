@@ -97,7 +97,6 @@ export default {
       },
       GOOGLE_API_KEY: 'AIzaSyAlip_fWGbMRdBhwsT615uPE5X0Rqzoc9k',
       googleFontsApiURL: 'https://www.googleapis.com/webfonts/v1/webfonts?key=',
-
       cacheFonts: true,
       remoteFontsPrefix: "remote/",
       loadNodeFont(ff, prefix) {

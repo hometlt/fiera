@@ -617,6 +617,7 @@ export const FmWarp = {
 				}
 				ctx.restore()
 			},
+
 			drawTransformedShapeBorders: function (ctx) {
 				if (!this.hasShapeBorders) return
 				let matrix = fabric.util.multiplyTransformMatrices(this.getViewportTransform(), this.calcTransformMatrix())
@@ -627,6 +628,7 @@ export const FmWarp = {
 				ctx.stroke()
 				ctx.restore()
 			},
+
 			_render: function (ctx) {
 				// if(!this._calc){
 				// 	this.calculateGeometry()
