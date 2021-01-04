@@ -76,8 +76,10 @@ export const App = {
         fabric.initialize({
             plugins: options.plugins,
             libRoot: "./../../lib/",
-            mediaRoot: "http://cdn.hometlt.ru/",
-            fontsRoot: "http://cdn.hometlt.ru/fonts/",
+            mediaRoot: "./../../../media/",
+            fontsRoot: "./../../../ fonts/",
+            // mediaRoot: "http://cdn.hometlt.ru/",
+            // fontsRoot: "http://cdn.hometlt.ru/fonts/",
             inlineSVG: true
         })
 

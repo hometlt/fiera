@@ -40,21 +40,21 @@ fabric.Clipart = fabric.util.createClass(
 
       this.on({
         "scaling": this.updateElement
-      });
+      })
 
-      this.initShape(options);
+      this.initShape(options)
       this._fabric_shape.set({
         opacity: 0,
         originX : 'center',
         originY : 'center',
-      });
+      })
 
-      this.callSuper('initialize', [this._fabric_shape], options);
-      this._setWidthHeight(options);
+      this.callSuper('initialize', [this._fabric_shape], options)
+      this._setWidthHeight(options)
     },
     setShape: function(el,cb){
 
-      el =  Object.assign({
+      el = Object.assign({
         strokeWidthFull: this.shape.strokeWidthFull,
         strokeWidthEmpty: this.shape.strokeWidthEmpty,
         strokeWidthActive: this.shape.strokeWidthActive,
@@ -62,7 +62,7 @@ fabric.Clipart = fabric.util.createClass(
         strokeEmpty:  this.shape.strokeEmpty,
         strokeFull:  this.shape.strokeFull,
         strokeActive:this.shape.strokeActive
-      },el);
+      },el)
 
       var _this = this;
       if(el && el.src && !el.paths){

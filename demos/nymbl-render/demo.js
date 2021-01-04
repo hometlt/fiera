@@ -83,6 +83,36 @@ App.create({
                 [{"x": 243, "y": 373, "t": 0.472, "c": 0}],
                 [{"x": 68, "y": 254, "t": 0.504, "c": 1}]]
         },
+        shirt: {
+            src: "products/shirt.png",
+            type: "image",
+            width: 667,
+            height: 1000
+        },
+        shirtInner: {
+            src: "products/SHIRT_INNER.png",
+            globalCompositeOperation: "multiply",
+            filters: [{
+                type: "BlendColor",
+                mode: 'overlay',
+                color: "#ffffff"
+            }],
+            type: "image",
+            width: 667,
+            height: 1000
+        },
+        shirtOuter: {
+            src: "products/SHIRT_OUTER.png",
+            globalCompositeOperation: "multiply",
+            filters: [{
+                type: "BlendColor",
+                mode: 'overlay',
+                color: "#d40029"
+            }],
+            type: "image",
+            width: 667,
+            height: 1000
+        },
         metup: {
             src: "metup.png",
             type: "photo-image",

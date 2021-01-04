@@ -1,5 +1,6 @@
 import {getProportions} from "../../util/size.js";
 import {uploadDialog} from "../util/uploader.js";
+import {uncapitalize} from "../../util/string.js";
 
 Object.assign( fabric.Image.prototype, {
   "+cacheProperties": ["crop","fitting","sourceRoot"],
@@ -473,5 +474,144 @@ Object.assign( fabric.Image.prototype, {
     canvas.history.processing = false;
 
     canvas.fire("modified");
+  },
+
+  getFilter: function (filterName) {
+    filterName = uncapitalize(filterName);
+    for(let i in this.filters){
+      if(uncapitalize(this.filters[i].type) === filterName){
+        return this.filters[i];
+      }
+    }
+    return false;
+  },
+  setFilters: function (filters) {
+
+    this.saveStates(["filters"]);
+
+    this.filters = [];
+    if(filters){
+      for(let filterOptions of filters){
+        //todo replace with application.createObject
+        let filterName = fabric.util.string.capitalize(fabric.util.string.camelize(filterOptions.type),true);
+        let filter = new fabric.Image.filters[filterName](filterOptions);
+        filter.image = this;
+        this.filters.push(filter);
+      }
+    }
+    if(this._originalElement){
+      this.applyFilters();
+    }
+    if(this.canvas){
+      this.canvas.fire('object:modified', {target: this});
+      this.canvas.renderAll();
+    }
+    this.fire('modified', {} );
+  },
+  getFiltersOptionsList(){
+    let filters = this.editor.getFiltersList(this);
+    for (let i in this.filters) {
+      let _f = filters.find(item => (item.type === fabric.util.string.capitalize(this.filters[i].type)));
+      if(_f){
+        _f.enabled = true;
+      }
+    }
+
+    for (let i in filters) {
+      filters[i].id = filters[i].type;
+    }
+    return [{
+      id: 'none',
+      text: 'original',
+      enabled: !this.filters || !this.filters.length,
+      value: false
+    }].concat(filters.map(item => ({
+      id: item.type,
+      value: {
+        id: item.type,
+        options: item.options
+      }
+    })));
+  },
+  createFilterThumbnail(filters, width, height){
+    if (!fabric.filterBackend) {
+      fabric.filterBackend = fabric.initFilterBackend();
+      fabric.isWebglSupported(fabric.textureSize);
+    }
+
+    let sourceImage = this.target._originalElement || this.target._element;
+
+    if(!sourceImage){
+      return;
+    }
+
+    let canvas = fabric.util.createCanvasElement();
+    canvas.width = width;
+    canvas.height = height;
+
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(sourceImage,0,0,this.dropdown.previewWidth,this.dropdown.previewHeight);
+
+    let fImage = fabric.util.createObject({
+      editor: this.target.editor,
+      type: this.target.type ,
+      element: canvas,
+      filters: filters
+    });
+    return fImage._element;
+  },
+  setFilter: function (filter) {
+    this.saveStates(["filters"]);
+
+
+    let _old_filter = false;
+    if(filter.replace){
+      this.filters = [];
+    }else{
+      _old_filter = this.filters.find(item => item.type === filter.type);
+      // _old_filter = fabric._.findWhere(this.filters, {type: filter.type});
+      _old_filter = _old_filter && _old_filter.toObject() || false;
+    }
+
+    let _type;
+    let _new_filter;
+
+    if(filter.type){
+      _type = fabric.util.string.capitalize(filter.type,true);
+      _new_filter = filter.options && fabric.util.object.clone(filter.options);
+    }else{
+      _type = false;
+      _new_filter = false;
+    }
+    this._set_filter(_type, _new_filter, _old_filter);
+
+    if(this.canvas){
+      this.canvas.renderAll();
+      this.canvas.fire('object:modified', {target: this});
+    }
+    this.fire('modified', {} );
+  },
+  _set_filter: function (_type, _new_filter) {
+    let _old_filter;
+
+    if(_type){
+      _old_filter = this.getFilter(_type);
+    }
+
+    if (_old_filter && _new_filter) {
+      for (let i in _new_filter) {
+        _old_filter[i] = _new_filter[i];
+      }
+    } else if (_old_filter && !_new_filter) {
+      this.filters.splice(this.filters.indexOf(_old_filter), 1);
+    }
+    if (!_old_filter && _new_filter) {
+      var filter = new fabric.Image.filters[_type](_new_filter);
+      filter.image = this;
+      this.filters.push(filter);
+    }
+    if(this._originalElement){
+      this.applyFilters();
+    }
   }
 });
