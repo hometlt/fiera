@@ -1,4 +1,4 @@
-import clipboard from "./../../polyfills/clipboard.js"
+import clipboard from "./../polyfills/clipboard.js"
 
 (function(window){
 

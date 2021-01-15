@@ -17,7 +17,7 @@ Object.assign( fabric.Image.prototype, {
   },
   eventListeners: {
     // "dblclick": "cropPhotoStart",
-    "resized scaling element:modified": "updatePhoto"
+    "scaling modified element:modified": "updatePhoto"
   },
   fitting: "fill", //fill to use fullsize images
   setSrc: function (src, callback) {

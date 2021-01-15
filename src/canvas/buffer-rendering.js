@@ -32,35 +32,35 @@ export const FmBufferRendering = {
 				ctx.restore();
 
 
-				if(obj && obj.renderTiles && obj._puzzles){
-					for(let row of obj._puzzles) for (let item of row.items) {
-						if(item.x === 0 && row.y === 0 || !obj.isPuzzleOnScreen(item.x,row.y  )) {
-							continue;
-						}
-						let point = obj._getPuzzleOffset( item.x, row.y , true )
-
-						let state = {
-							left: obj.left,
-							top: obj.top
-						}
-
-						obj.left = state.left + point.x
-						obj.top = state.top +  point.y
-
-						_bufferCtx.clearRect(0, 0, _bufferCtx.canvas.width, _bufferCtx.canvas.height);
-						_bufferCtx.save();
-						obj && obj.bufferRender(_bufferCtx,transformations);
-						_bufferCtx.restore();
-
-						ctx.save();
-						obj._setupCompositeOperation(ctx);
-						ctx.drawImage(_bufferCtx.canvas,0,0)
-						ctx.restore();
-
-						obj.left = state.left
-						obj.top = state.top
-					}
-				}
+				// if(obj && obj.renderTiles && obj._puzzles){
+				// 	for(let row of obj._puzzles) for (let item of row.items) {
+				// 		if(item.x === 0 && row.y === 0 || !obj.isPuzzleOnScreen(item.x,row.y  )) {
+				// 			continue;
+				// 		}
+				// 		let point = obj._getPuzzleOffset( item.x, row.y , true )
+				//
+				// 		let state = {
+				// 			left: obj.left,
+				// 			top: obj.top
+				// 		}
+				//
+				// 		obj.left = state.left + point.x
+				// 		obj.top = state.top +  point.y
+				//
+				// 		_bufferCtx.clearRect(0, 0, _bufferCtx.canvas.width, _bufferCtx.canvas.height);
+				// 		_bufferCtx.save();
+				// 		obj && obj.bufferRender(_bufferCtx,transformations);
+				// 		_bufferCtx.restore();
+				//
+				// 		ctx.save();
+				// 		obj._setupCompositeOperation(ctx);
+				// 		ctx.drawImage(_bufferCtx.canvas,0,0)
+				// 		ctx.restore();
+				//
+				// 		obj.left = state.left
+				// 		obj.top = state.top
+				// 	}
+				// }
 			}
 		}
 
@@ -165,24 +165,26 @@ export const FmBufferRendering = {
 					this[this.beforeRender[i]](ctx, transformations)
 				}
 				this._render(ctx)
-				if (this._objects) {
-					ctx.save()
-					ctx.setTransform(1, 0, 0, 1, 0, 0)
-					// ctx.translate(this.width/2,this.height/2)
-					fabric.util.bufferRenderobjects(this.canvas,ctx, this._objects, transformations)
-					ctx.restore()
+
+				if(this.puzzle){
+					this.renderTiles(ctx)
 				}
-				this._drawClipPath(ctx, transformations)
+				else{
+					if (this._objects) {
+						ctx.save()
+						ctx.setTransform(1, 0, 0, 1, 0, 0)
+						// ctx.translate(this.width/2,this.height/2)
+						fabric.util.bufferRenderobjects(this.canvas,ctx, this._objects, transformations)
+						ctx.restore()
+					}
+					this._drawClipPath(ctx, transformations)
+				}
 
 				for (let i = 0; i < this.afterRender.length; i++) {
 					// this[this.afterRender[i]](ctx, false, transformations)
 					this[this.afterRender[i]](ctx, transformations)
 				}
-
-
-
 				transformations.pop();
-
 
 				if(!transformations.length){
 					//clear buffers

@@ -160,6 +160,7 @@ export const FmTiles = {
 				this.puzzle = value;
 				this._update_puzzle();
 				this.on("added modified scaling loaded moving rotating","updateTiling")
+				this.on("scaling modified","renderTilesCache")
 				this.updateState()
 			},
 			setPuzzlePreset (value){
@@ -169,8 +170,6 @@ export const FmTiles = {
 			},
 			_update_puzzle (){
 				delete this._puzzles;
-				// this.dirty = true;
-				// this.saveStates(["puzzle"])
 				let value = fabric.util.object.clone(this.puzzle,true);
 				if(value){
 					if(!value.offsetsY){
@@ -200,16 +199,6 @@ export const FmTiles = {
 				}
 
 				this._puzzleOptions = value;
-
-				// this._set("_puzzleOptions",value)
-				// // this.fire("modified", {});
-				// if (this.canvas) {
-				// 	this.canvas.fire("object:modified", {target: this});
-				// 	this.canvas.renderAll();
-				// }
-				// //todo use "set" function
-
-
 
 				if (this.canvas) {
 					this.updateTiling();
@@ -306,75 +295,19 @@ export const FmTiles = {
 
 				return {x,y}
 			},
-// 			renderTiles2(ctx) {
-// 				let puzzles = this._puzzles
-// 				if(!puzzles)return
-//
-//
-// 				let ymin = Infinity, xmin = Infinity, xmax= -Infinity, ymax = -Infinity
-// 				for(let row of puzzles) {
-// 					for (let item of row.items) {
-// 						if(item.point.y < ymin)ymin = item.point.y
-// 						if(item.point.y > ymax)ymax = item.point.y
-// 						if(item.point.x < xmin)xmin = item.point.x
-// 						if(item.point.x > xmax)xmax = item.point.x
-// 					}
-// 				}
-// 				ymin -= this.height
-// 				ymax += this.height
-// 				xmin -= this.width
-// 				xmax += this.width
-//
-// 				if(!this._puzzleCache){
-// 					this._puzzleCache = fabric.util.createCanvasElement();
-// 					this._puzzleCacheContext = this._puzzleCache.getContext('2d')
-// 				}
-// 				this._puzzleCache.width = xmax - xmin
-// 				this._puzzleCache.height = ymax - ymin
-// 				this._puzzleCacheContext.translate(-xmin,-ymin)
-//
-// 				let ctx2 = this._puzzleCacheContext;
-// 				let index = 0;
-// 				for(let row of puzzles) {
-// 					for (let item of row.items) {
-// 						// if(item.x === 0 && row.y === 0 ){
-// 						// 	continue;
-// 						// }
-// 						ctx2.save()
-// 						ctx2.translate(item.point.x,item.point.y)
-// // 						if(this._cacheCanvas){
-// // 							this.drawCacheOnCanvas(ctx2);
-// // 						}
-// // 						else{
-// 						this.drawObject(ctx2)
-// // 						}
-// 						ctx2.restore()
-// 						index++
-// 					}
-// 				}
-// 				ctx.translate(xmin,ymin)
-// 				ctx.drawImage(this._puzzleCache,0,0)
-// 			},
-			renderTiles(ctx) {
-				if(!this.puzzle)return
-				// let canvasTransform = ctx.getTransform();
-				ctx.save()
-				ctx.setTransform(1,0,0,1,0,0)
-
-				//TODO!!!!!
-				// let clipPath = this.clipPath;
-				// delete this.clipPath
-				if(!this._tileContext){
+			renderTilesCache() {
+				if(!this._tileCanvas) {
 					this._tileCanvas = fabric.util.createCanvasElement();
 					this._tileContext = this._tileCanvas.getContext('2d')
 					this._tileBufferCanvas = fabric.util.createCanvasElement();
 					this._tileBufferContext = this._tileBufferCanvas.getContext('2d')
 				}
 
+				this._tileBufferCanvasScaleX = this.scaleX
+				this._tileBufferCanvasScaleY = this.scaleY
+				//TODO 60 MS!!!
 				this._tileBufferCanvas.width = this._tileCanvas.width = this._calc.tilesWidth * this.scaleX
 				this._tileBufferCanvas.height = this._tileCanvas.height = this._calc.tilesHeight * this.scaleY
-				//this._tileContext.scale(this.scaleX,this.scaleY)
-				//this._tileContext.translate(this.width/2,this.height/2)
 				this._tileBufferContext.scale(this.scaleX,this.scaleY)
 				this._tileBufferContext.translate(this.width/2,this.height/2)
 
@@ -382,7 +315,7 @@ export const FmTiles = {
 				let offsetsY = this._puzzleOptions.offsetsY.length
 				let offsetsX = this._puzzleOptions.offsetsX.length
 
-
+				//!! TODO EXTRA RENDERS 25MS!!
 				let x= 0, y = 0;
 				for(y = -offsetsY ;y < offsetsY * 2; y++) for (x = -offsetsX; x < offsetsX * 2; x++) {
 					let offset = this._getPuzzleOffset(x, y)
@@ -399,37 +332,11 @@ export const FmTiles = {
 					this._tileContext.drawImage(this._tileBufferCanvas,0,0)
 					this._tileBufferContext.restore();
 				}
-
-
-
-
-
-				// this.clipPath = clipPath
-
-				// 		for(let y =0 ;y < this._puzzleOptions.offsetsY.length; y++) {
-				// 			for (let x = 0; x < this._puzzleOptions.offsetsX.length; x++) {
-				// 				let offset = this._getPuzzleOffset(x,y,true)
-				// 				// rotate(${this.angle}) translate(${offset.x} ${offset.y})
-				//
-				// 				let matrix = this.calcOwnMatrix().slice();
-				//
-				// 				matrix[4] += offset.x - this.width/2
-				// 				matrix[5] += offset.y - this.height/2
-				// 				let svgTransform = fabric.util.matrixToSVG(matrix);
-				//
-				// 				markup += `
-				//   <pattern id="tile-${this.id}-${x}-${y}" x="0" y="0" width="${tilesWidth}" height="${tilesHeight}" patternUnits="userSpaceOnUse" patternTransform="${svgTransform}">
-				// 	<g transform="translate(${this.width/2} ${this.height/2})">
-				// 	  ${baseMarkup}
-				// 	</g>
-				//   </pattern>
-				//   <rect x="0" y="0" width="100%" height="100%" fill="url(#tile-${this.id}-${x}-${y})"/>
-
-
-
-				// todo dirty stuff
-				// this.drawObject(this._tileContext)
-				// fabric.util.bufferDrawObject.call(this, this._tileContext, false, []);
+			},
+			renderTiles(ctx) {
+				if(!this.puzzle)return
+				ctx.save()
+				ctx.setTransform(1,0,0,1,0,0)
 
 				let rectWidth = this._calc.width
 				let rectHeight = this._calc.height
@@ -438,20 +345,10 @@ export const FmTiles = {
 
 				let transform
 				if(this.group){
-
 					ctx.translate(
 						ctx.canvas.width /2  - this.group.width * this.group.scaleX / 2,
 						ctx.canvas.height /2  - this.group.height * this.group.scaleY / 2)
-					// transform = this.group.calcOwnMatrix()
 					transform = [this.group.scaleX,0,0,this.group.scaleY,0,0]
-					//transform = [this.group.scaleX,0,0,this.group.scaleY,0,0]
-
-					// console.log(transform)
-
-
-// 					rectLeft = this.group.cacheTranslationX * this.group.scaleX
-// 					rectTop = this.group.cacheTranslationY * this.group.scaleY
-
 				}
 				else{
 					transform = this.canvas.viewportTransform;
@@ -459,9 +356,14 @@ export const FmTiles = {
 					rectTop = 0
 				}
 
+				if(!this._tileCanvas){
+					this.renderTilesCache()
+				}
+
+				//28MS!!!
 				let MatrixClass = fabric.Node && fabric.Node.DOMMatrix || DOMMatrix
 				let matrix = new MatrixClass(transform);
-				let pattern = ctx.createPattern(this._tileCanvas, 'repeat');
+				this._tilesPattern = ctx.createPattern(this._tileCanvas, 'repeat');
 
 				if(!this.canvas.__forExport){
 					matrix = matrix.scale(fabric.devicePixelRatio)
@@ -476,96 +378,23 @@ export const FmTiles = {
 				}
 				matrix =  matrix.skewX(this.skewX).skewY(this.skewY)
 
+				//TODO 25MS!
+				this._tilesPattern.setTransform(matrix)
 
+				if(this._tileBufferCanvasScaleX !== this.scaleX){
+					ctx.scale(this.scaleX/this._tileBufferCanvasScaleX,1)
+				}
+				if(this._tileBufferCanvasScaleY !== this.scaleY){
+					ctx.scale(1,this.scaleY/this._tileBufferCanvasScaleY)
+				}
 
-				pattern.setTransform(matrix)
-
-				ctx.fillStyle = pattern;
+				ctx.fillStyle = this._tilesPattern;
 				ctx.fillRect(0,0, rectWidth, rectHeight);
 
 
 				ctx.restore()
 			},
-			// renderTiles0(ctx) {
-			// 	if(!this._puzzles)return
-			//
-			// 	let index = 0;
-			// 	let puzzles = this._puzzles
-			// 	for(let row of puzzles) {
-			// 		for (let item of row.items) {
-			// 			if(item.x === 0 && row.y === 0 ){
-			// 				continue;
-			// 			}
-			// 			ctx.save()
-			// 			ctx.translate(item.point.x,item.point.y)
-			// 			if(this._cacheCanvas){
-			// 				this.drawCacheOnCanvas(ctx);
-			// 			}
-			// 			else{
-			// 				this.drawObject(ctx)
-			// 			}
-			// 			ctx.restore()
-			// 			index++
-			// 		}
-			// 	}
-			// },
-			// "+afterRender": ["renderTiles"],
 			_tiles: null,
-			/**
-			 * Renders an object on a specified context
-			 * @param {CanvasRenderingContext2D} ctx Context to render on
-			 */
-			// forceUpdateTiling () {
-			// 	for(let y in this._tiles){
-			// 		for(let x in this._tiles[y]){
-			// 			this._tiles[y][x].removeFromCanvas();
-			// 		}
-			// 	}
-			// 	delete this._tiles
-			// 	this.updateTiling();
-			// },
-
-			// _renderRow(startX, y){
-			// 	let puzzles = []
-			// 	let x = startX - 1
-			// 	let missed = 0
-			// 	while(missed < this._puzzleOptions.offsetsX.length + 1){
-			//
-			// 		if(this.isPuzzleOnScreen(x, y)){
-			// 			missed = 0
-			// 			let data = this._getPuzzleOffset(x,y,false)
-			// 			puzzles.push({x: x, point: data})
-			// 		}
-			// 		else{
-			// 			//TODO we should do better math and do not add puzzles which might be out of screen! buT HERE IS A BUG ON PRODUT PREVIEW
-			// 			{
-			// 				let data = this._getPuzzleOffset(x,y,false)
-			// 				puzzles.push({x: x, point: data})
-			// 			}
-			// 			missed++
-			// 		}
-			// 		x--
-			// 	}
-			// 	x = startX
-			// 	missed = 0
-			// 	while(missed < this._puzzleOptions.offsetsY.length + 1){
-			// 		if(this.isPuzzleOnScreen(x, y)){
-			// 			missed = 0
-			// 			let data = this._getPuzzleOffset(x,y,false)
-			// 			puzzles.push({x: x, point: data})
-			// 		}
-			// 		else{
-			// 			//TODO
-			// 			{
-			// 				let data = this._getPuzzleOffset(x,y,false)
-			// 				puzzles.push({x: x, point: data})
-			// 			}
-			// 			missed++
-			// 		}
-			// 		x++
-			// 	}
-			// 	return puzzles
-			// },
 			updateTiling () {
 				if(!this._puzzleOptions) {
 					return
@@ -628,12 +457,6 @@ export const FmTiles = {
 					h = this.canvas.getOriginalHeight()
 				}
 
-				// for(let y in this._tiles){
-				// 	for(let x in this._tiles[y]){
-				// 		this._tiles[y][x].visible = false;
-				// 	}
-				// }
-
 				this._calc = {
 					left: l,
 					top: t,
@@ -655,67 +478,6 @@ export const FmTiles = {
 					tilesWidth: xvectorsRel.reduce((acc,cur) => acc + cur.x,0),
 					tilesHeight: yvectorsRel.reduce((acc,cur) => acc + cur.y,0)
 				}
-
-
-				// let y = 0;
-				// let puzzles = []
-
-				// let renderNext = true
-
-				// puzzles.push({y: 0 , items: this._renderRow(0, 0)})
-
-				// y = 1
-				// do {
-				// 	renderNext = false
-				// 	if (puzzles[y - 1].items.length) {
-				// 		for (let x = puzzles[y - 1].items[0].x - 1; x <= puzzles[y - 1].items.slice(-1)[0].x; x++) {
-				// 			if (this.isPuzzleOnScreen(x, y )) {
-				// 				puzzles.push({y: y , items: this._renderRow(x, y)})
-				// 				y ++
-				// 				renderNext = true
-				// 				break
-				// 			}
-				// 		}
-				// 	}
-				// }while(renderNext)
-				//
-				// y = -1
-				// do {
-				// 	renderNext = false
-				// 	if (puzzles[0].items.length) {
-				// 		for (let x = puzzles[0].items[0].x - 1; x < puzzles[0].items.slice(-1)[0].x; x++) {
-				// 			if (this.isPuzzleOnScreen(x, y )) {
-				// 				puzzles.unshift({y: y , items: this._renderRow(x, y)})
-				// 				y --
-				// 				renderNext = true
-				// 				break
-				// 			}
-				// 		}
-				// 	}
-				// } while (renderNext)
-
-				// let originalText = this.text
-
-				// let _alpha = ctx.globalAlpha
-				// ctx.globalAlpha *= this.puzzleAlpha;
-
-				// this._puzzles = puzzles
-
-				// if (this.shouldCache()) {
-				// 	this.renderCache()
-				// 	this.drawCacheOnCanvas(ctx)
-				// }
-				// else {
-				// 	this._removeCacheCanvas()
-				// 	this.dirty = false
-				// 	this.drawObject(ctx)
-				// 	if (this.objectCaching && this.statefullCache) {
-				// 		this.saveState({ propertySet: 'cacheProperties' })
-				// 	}
-				// }
-				// this.clipTo && ctx.restore()
-				// ctx.restore()
-				// this.canvas.requestRenderAll();
 			}
 		},
 		Image: {

@@ -196,32 +196,42 @@ Object.assign(fabric.Canvas.prototype, {
       return;
     }
 
-    if(this._activeObject || !this.allowTouchScrolling) {
-      e.preventDefault && e.preventDefault();
-    }
-    let _lastHoveredTarget = this._hoveredTarget;
-    this._hoveredTarget = this.findTarget(e) || null;
-    if(_lastHoveredTarget !== this._hoveredTarget){
-      if(_lastHoveredTarget){
-        let obj = _lastHoveredTarget;
-        obj.fire("blur")
-        this.fire("object:blur",{target:obj})
+    //
+    // if(this._currentTransform) {
+    //   this._cacheTransformEventData(e);
+    //   this._transformObject(e);
+    //   this._handleEvent(e, 'move');
+    //   this._resetTransformEventData();
+    // }
+    // else{
+      if(this._activeObject || !this.allowTouchScrolling) {
+        e.preventDefault && e.preventDefault();
       }
-      if(this._hoveredTarget){
-        let obj = this._hoveredTarget;
-        obj.fire("focus")
-        this.fire("object:focus",{target:obj})
+      let _lastHoveredTarget = this._hoveredTarget;
+      this._hoveredTarget = this.findTarget(e) || null;
+      if(_lastHoveredTarget !== this._hoveredTarget){
+        if(_lastHoveredTarget){
+          let obj = _lastHoveredTarget;
+          obj.fire("blur")
+          this.fire("object:blur",{target:obj})
+        }
+        if(this._hoveredTarget){
+          let obj = this._hoveredTarget;
+          obj.fire("focus")
+          this.fire("object:focus",{target:obj})
+        }
       }
-    }
 
-    this.updateInteractiveMode(e);
-    // this._applyMixedMode(e);
+      this.updateInteractiveMode(e);
+      // this._applyMixedMode(e);
 
-    if (this._handModeData) {
-      return this._handModeMouseMove(e);
-    } else {
-      this.__onMouseMove(e);
-    }
+      if (this._handModeData) {
+        return this._handModeMouseMove(e);
+      } else {
+        this.__onMouseMove(e);
+      }
+    // }
+
   }, /**
    * @private
    */

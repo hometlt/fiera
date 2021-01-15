@@ -245,6 +245,7 @@ App.create({
             clipPath: true
         },
         Canvas: {
+            useBufferRendering: true,
             minDpi: 200,
             preserveObjectStackingSelection: true,
             outerCanvasOpacity: 0,

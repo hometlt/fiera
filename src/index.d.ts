@@ -252,11 +252,11 @@ declare module fabric {
 
   export interface IWarpOptions extends IObjectOptions {
     subdivisions?: number;
-    points?: [number] | [{x: number,y : number}] | false,
-    transformations? : false | [{x: number, y: number, c: boolean | 0 | 1}]
+    points?: [number] | [{x: number,y : number}] | false;
+    transformations? : false | [{x: number, y: number, c?: boolean | 0 | 1}];
   }
 
-  export interface IAnyObjectOptions extends ICanvasOptions, IRectOptions, ICircleOptions, ITextOptions ,IPathOptions, IImageOptions, ILineOptions, IGroupOptions,IWarpOptions {
+  export interface IAnyObjectOptions extends ICanvasOptions, IRectOptions, ICircleOptions, ITextOptions ,IPathOptions, IImageOptions, ILineOptions, IGroupOptions, IWarpOptions {
   }
 
   export interface IPoint {
@@ -840,6 +840,7 @@ declare module fabric {
     //ponomarevtlt
     getState(): ICanvasOptions;
     set(options: ICanvasOptions): void
+    set(option: string, value: any): void
     getPhotoPlaceholder: (size: {width: number, height: number}) => {width: number, height: number};
     originalHeight: number;
     originalWidth: number;

@@ -1,9 +1,9 @@
 
-import '../../src/fiera.core.js'
-import {canvasToBlobPromise} from "../../util/canvasToBlob.js";
+import '../src/fiera.core.js'
+import {canvasToBlobPromise} from "../util/canvasToBlob.js";
 import {createTools} from "./tools.js";
 import "./console-debug.js";
-import {FmBufferRendering} from "../../src/modules.js";
+
 
 
 
@@ -76,10 +76,10 @@ export const App = {
         fabric.initialize({
             plugins: options.plugins,
             libRoot: "./../../lib/",
-            mediaRoot: "./../../../media/",
-            fontsRoot: "./../../../fonts/",
-            // mediaRoot: "http://cdn.hometlt.ru/",
-            // fontsRoot: "http://cdn.hometlt.ru/fonts/",
+            // mediaRoot: "./../../../media/",
+            // fontsRoot: "./../../../fonts/",
+            mediaRoot: "http://cdn.hometlt.ru/",
+            fontsRoot: "http://cdn.hometlt.ru/fonts/",
             inlineSVG: true
         })
 

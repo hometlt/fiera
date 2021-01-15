@@ -20,6 +20,8 @@ export const FmTransformations = {
   name: "transformations",
   prototypes: {
     Object: {
+      widthStep: 2,
+      heightStep: 2,
       setRoundCoordinates: function(val){
         this.roundCoordinates = val;
         this.on("added modified",() => {
@@ -29,8 +31,8 @@ export const FmTransformations = {
             this.set({
               left: Math.round(this.left),
               top: Math.round(this.top),
-              width: Math.round(this.width),
-              height: Math.round(this.height)
+              width: this.width - (this.width % this.widthStep),
+              height: this.height - (this.height % this.heightStep),
             })
 
             let tDims = this._getTransformedDimensions()

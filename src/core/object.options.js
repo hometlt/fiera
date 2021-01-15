@@ -122,18 +122,27 @@ export const FmSetters = {
 				if (isChanged) {
 					this[key] = value
 					groupNeedsUpdate = this.group && this.group.isOnACache()
+
+					let isCurrentTramsform = this.canvas && this.canvas._currentTransform && this.canvas._currentTransform.target === this
+
 					if (this.cacheProperties.indexOf(key) > -1) {
 						this.dirty = true
 						if (groupNeedsUpdate) {
 							this.group.setDirty(true)
-							this.group.fire("modified")
+							if(!isCurrentTramsform){
+								this.group.fire("modified")
+							}
 						}
 					} else if (groupNeedsUpdate && this.stateProperties.indexOf(key) > -1) {
 						this.group.setDirty(true)
-						this.group.fire("modified")
+						if(!isCurrentTramsform) {
+							this.group.fire("modified")
+						}
 					}
 					if (this.canvas) {
-						this.fire("modified", {target: this, original: origValue, modified: value })
+						if(!isCurrentTramsform) {
+							this.fire("modified", {target: this, original: origValue, modified: value})
+						}
 						// this.canvas.requestRenderAll()
 						this.canvas.renderAll()
 					}

@@ -325,7 +325,7 @@ export const FmCLipPath = {
         return shape;
       },
       eventListeners: {
-        "resized scaling": "updateClipPath"
+        "scaling modified": "updateClipPath"
       }
     },
     StaticCanvas:{
