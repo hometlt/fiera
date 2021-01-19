@@ -1,6 +1,7 @@
 export default {
-    width: 1043,
-    height: 521.68,
+    type: "template",
+    width: 1042,
+    height: 520,
     objects: [
         {
             type: "rect",
@@ -30,7 +31,8 @@ export default {
                 absolutePositioned: false
             },
             crossOrigin: "",
-            src: "https://media.designerapp.me/media/8f789450-3c22-4203-8f49-ef5e91c287a1.svg",
+            // src: "https://media.designerapp.me/media/8f789450-3c22-4203-8f49-ef5e91c287a1.svg",
+            src: "https://media.designerapp.me/media/2dc1cda8-72c9-4194-8261-b6c468e9baa0.jpg",
             filters: []
         },
         {
@@ -186,14 +188,6 @@ export default {
             fontSize: 83.92652893,
             fontFamily: "Baloo 2",
             styles: {}
-        },
-        {
-            type: "template-photo-image",
-            left: 400,
-            top: 150,
-            width: 602,
-            height: 402,
-            src: "fox.jpg"
-        },
+        }
     ]
 }

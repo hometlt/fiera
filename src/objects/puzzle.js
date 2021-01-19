@@ -151,22 +151,36 @@ export const FmTiles = {
 			},
 			setPuzzle(value){
 				this.saveStates(["puzzle"]);
+				this.puzzle = value;
 				if(!value){
 					this.puzzlePreset = "none"
+					this.off("added modified scaling loaded moving rotating","updateTiling")
+					this.off("scaling modified","renderTilesCache")
 				}
 				else{
 					this.puzzlePreset = "custom"
+					this.on("added modified scaling loaded moving rotating","updateTiling")
+					this.on("scaling modified","renderTilesCache")
 				}
-				this.puzzle = value;
 				this._update_puzzle();
-				this.on("added modified scaling loaded moving rotating","updateTiling")
-				this.on("scaling modified","renderTilesCache")
 				this.updateState()
 			},
 			setPuzzlePreset (value){
 				let puzzlePreset = camelize(value);
-				this.setPuzzle(this.puzzlePresets[puzzlePreset])
-				this.puzzlePreset = puzzlePreset
+				this.saveStates(["puzzle"]);
+				this.puzzle = this.puzzlePresets[puzzlePreset];
+				if(!this.puzzle){
+					this.puzzlePreset = "none"
+					this.off("added modified scaling loaded moving rotating","updateTiling")
+					this.off("scaling modified","renderTilesCache")
+				}
+				else{
+					this.puzzlePreset = puzzlePreset
+					this.on("added modified scaling loaded moving rotating","updateTiling")
+					this.on("scaling modified","renderTilesCache")
+				}
+				this._update_puzzle();
+				this.updateState()
 			},
 			_update_puzzle (){
 				delete this._puzzles;
@@ -296,42 +310,124 @@ export const FmTiles = {
 				return {x,y}
 			},
 			renderTilesCache() {
+
+				if(!this.puzzle)return;
+				let buffer = this._tileBufferCanvas, bufferCtx = this._tileBufferContext
 				if(!this._tileCanvas) {
 					this._tileCanvas = fabric.util.createCanvasElement();
 					this._tileContext = this._tileCanvas.getContext('2d')
-					this._tileBufferCanvas = fabric.util.createCanvasElement();
-					this._tileBufferContext = this._tileBufferCanvas.getContext('2d')
+					buffer = this._tileBufferCanvas = fabric.util.createCanvasElement();
+					bufferCtx = this._tileBufferContext = buffer.getContext('2d')
 				}
+
 
 				this._tileBufferCanvasScaleX = this.scaleX
 				this._tileBufferCanvasScaleY = this.scaleY
+
 				//TODO 60 MS!!!
-				this._tileBufferCanvas.width = this._tileCanvas.width = this._calc.tilesWidth * this.scaleX
-				this._tileBufferCanvas.height = this._tileCanvas.height = this._calc.tilesHeight * this.scaleY
-				this._tileBufferContext.scale(this.scaleX,this.scaleY)
-				this._tileBufferContext.translate(this.width/2,this.height/2)
+				let w = buffer.width = this._tileCanvas.width = this._calc.tilesWidth * this.scaleX
+				let h = buffer.height = this._tileCanvas.height = this._calc.tilesHeight * this.scaleY
+				//	bufferCtx.scale(this.scaleX,this.scaleY)
+				//	bufferCtx.translate(this.width/2,this.height/2)
 
 
 				let offsetsY = this._puzzleOptions.offsetsY.length
 				let offsetsX = this._puzzleOptions.offsetsX.length
 
-				//!! TODO EXTRA RENDERS 25MS!!
-				let x= 0, y = 0;
-				for(y = -offsetsY ;y < offsetsY * 2; y++) for (x = -offsetsX; x < offsetsX * 2; x++) {
-					let offset = this._getPuzzleOffset(x, y)
-
-					this._tileBufferContext.save();
-					// Use the identity matrix while clearing the canvas
-					this._tileBufferContext.setTransform(1, 0, 0, 1, 0, 0);
-					this._tileBufferContext.clearRect(0,0,this._tileBufferCanvas.width,this._tileBufferCanvas.height)
-					// Restore the transform
-					this._tileBufferContext.restore();
-					this._tileBufferContext.save()
-					this._tileBufferContext.translate(offset.x,offset.y)
-					this.drawObject(this._tileBufferContext,false,[]);
-					this._tileContext.drawImage(this._tileBufferCanvas,0,0)
-					this._tileBufferContext.restore();
+				//todo should calculate this
+				let onScreenTiles = []
+				switch(this.puzzlePreset){
+					case "halfBrick":
+						onScreenTiles = [{x:0,y:0},{x:1,y:0},{x:0,y:1},{x:-1,y:1}]
+						break;
+					case "halfDrop":
+						onScreenTiles = [{x:0,y:0},{x:1,y:0},{x:0,y:1},{x:1,y:-1}]
+						break;
+					default:
+						let value = JSON.stringify(this.puzzle)
+						if(value === `{"offsetsX":[{"x":1,"y":0.5},{"x":1,"y":-0.5}]}`){//half-drop
+							onScreenTiles = [{x:0,y:0},{x:1,y:0},{x:0,y:1},{x:1,y:-1}]
+						}
+						else if(value === `{"offsetsY":[{"x":0.5,"y":1},{"x":-0.5,"y":1}]}`){//halfBrick
+							onScreenTiles = [{x:0,y:0},{x:1,y:0},{x:0,y:1},{x:-1,y:1}]
+						}
+						else{
+							onScreenTiles = [{x:0,y:0}]
+						}
 				}
+
+				fabric.currentBuffersStack = []
+				for(let tile of onScreenTiles){
+					let offset = this._getPuzzleOffset(tile.x, tile.y)
+					//
+					// this._tileContext.save();
+					// // Use the identity matrix while clearing the canvas
+					// //bufferCtx.setTransform(1, 0, 0, 1, 0, 0);
+					// //bufferCtx.clearRect(0,0, w, h)
+					// // Restore the transform
+					// //bufferCtx.restore();
+					// //bufferCtx.save()
+					// this._tileContext.translate(offset.x,offset.y)
+					// this.bufferDrawObject(this._tileContext,false,[[1, 0, 0, 1, 0, 0]]);
+					// //this._tileContext.drawImage(buffer,0,0)
+					// this._tileContext.restore();
+
+
+					// Use the identity matrix while clearing the canvas
+					bufferCtx.save();
+					bufferCtx.setTransform(1, 0, 0, 1, 0, 0);
+					bufferCtx.clearRect(0,0, w, h)
+					bufferCtx.restore();
+
+
+					bufferCtx.save()
+
+
+
+					//this.drawObject(bufferCtx,false,[]);
+					fabric.tilingBuffers = []
+
+					if(this.type === "group" || this.type === "template"){
+// 					this._transformDone = true
+						bufferCtx.translate(offset.x * this.scaleX,offset.y * this.scaleY)
+						this.___top = this.top
+						this.___left = this.left
+						this.___angle = this.angle
+//this.___scaleX = this.scaleX
+//this.___scaleY = this.scaleY
+						this.top = 0;
+						this.left = 0;
+						this.angle = 0;
+					}
+					else{
+						bufferCtx.scale(this.scaleX,this.scaleY)
+						bufferCtx.translate(this.width/2,this.height/2)
+						bufferCtx.translate(offset.x ,offset.y)
+					}
+
+
+
+					this.bufferDrawObject(bufferCtx,false,[[1, 0, 0, 1, 0, 0]]);
+
+					if(this.type === "group" || this.type === "template"){
+// 					delete this._transformDone
+
+						this.top = this.___top
+						this.left = this.___left
+						this.angle = this.___angle
+//this.scaleX = this.___scaleX
+//this.scaleY = this.___scaleY
+
+					}
+					else{
+
+					}
+
+					delete fabric.tilingBuffers
+					this._tileContext.drawImage(buffer,0,0)
+					bufferCtx.restore()
+				}
+				delete fabric.currentBuffersStack
 			},
 			renderTiles(ctx) {
 				if(!this.puzzle)return
@@ -390,8 +486,6 @@ export const FmTiles = {
 
 				ctx.fillStyle = this._tilesPattern;
 				ctx.fillRect(0,0, rectWidth, rectHeight);
-
-
 				ctx.restore()
 			},
 			_tiles: null,

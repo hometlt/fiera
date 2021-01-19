@@ -308,6 +308,7 @@ declare module fabric {
     clipPath: IObject;
     strokeStyle: string;
     backgroundColor: string;
+    group: IGroup;
 
     // constraint properties
     lockMovementX: boolean;
@@ -952,7 +953,7 @@ declare module fabric {
     selectionDashArray?: number[];
     selectionLineWidth?: number;
     targetFindTolerance?: number;
-
+    useBufferRendering?: boolean;
 
     preserveObjectStacking?: boolean;
     preserveObjectStackingSelection?: boolean;

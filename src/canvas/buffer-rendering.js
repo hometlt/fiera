@@ -116,7 +116,7 @@ export const FmBufferRendering = {
 
 				this._render(ctx)
 				fabric.util.bufferRenderobjects(this.canvas,ctx, this._objects, transformations)
-				this._drawClipPath(ctx, transformations)
+				//this._drawClipPath(ctx, transformations)
 
 				for (let i = 0; i < this.afterRender.length; i++) {
 					this[this.afterRender[i]](ctx, forClipping)
@@ -164,12 +164,12 @@ export const FmBufferRendering = {
 				for (let i = 0; i < this.beforeRender.length; i++) {
 					this[this.beforeRender[i]](ctx, transformations)
 				}
-				this._render(ctx)
 
 				if(this.puzzle){
 					this.renderTiles(ctx)
 				}
 				else{
+					this._render(ctx)
 					if (this._objects) {
 						ctx.save()
 						ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -195,17 +195,20 @@ export const FmBufferRendering = {
 		StaticCanvas: {
 			getBuffer(ctx, transformations){
 				let level = transformations.length - 1;
-				if(!this._buffers) {
-					this._buffers = [];
-					this._buffersCtx = [];
+// 				if(!this._buffers) {
+// 					this._buffers = [];
+// // 					this._buffersCtx = [];
+// 				}
+
+				let buffers = fabric.tilingBuffers || fabric.currentBuffersStack
+
+				if(!buffers[level]) {
+					buffers[level] = fabric.util.createCanvasElement();
+					fabric.util.fire("buffer:created",{target: this, buffer: buffers[level], level: level})
+// 					this._buffersCtx[level] = this._buffers[level].getContext("2d")
 				}
-				if(!this._buffers[level]) {
-					this._buffers[level] = fabric.util.createCanvasElement();
-					fabric.util.fire("buffer:created",{target: this, buffer: this._buffers[level], level: level})
-					this._buffersCtx[level] = this._buffers[level].getContext("2d")
-				}
-				let _buffer = this._buffers[level];
-				let _bufferCtx = this._buffersCtx[level];
+				let _buffer = buffers[level];
+				let _bufferCtx = buffers[level].getContext("2d")
 				_buffer.width = ctx.canvas.width;
 				_buffer.height = ctx.canvas.height;
 				_bufferCtx.save();
@@ -238,6 +241,10 @@ export const FmBufferRendering = {
 				if (!objects || !objects.length) return;
 
 				if(this.useBufferRendering){
+					if(!this._buffers){
+						this._buffers = []
+					}
+					fabric.currentBuffersStack = this._buffers
 					let transformations =[this.viewportTransform];
 					ctx.save()
 					fabric.util.bufferRenderobjects(this, ctx, objects, transformations)
@@ -252,6 +259,7 @@ export const FmBufferRendering = {
 					// path._transformDone = true;
 					this._drawClipPath( ctx, transformations)
 					ctx.restore()
+					delete fabric.currentBuffersStack
 					// path.renderCache({forClipping: true});
 					// this.drawClipPathOnCanvas(ctx);
 				}

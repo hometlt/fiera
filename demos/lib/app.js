@@ -176,7 +176,14 @@ export const App = {
         return Object.entries(App.elements).map(([key,value]) => ({value: key, label: key}))
     },
     createObject: (value) => {
-        editor.canvas.createObject(App.elements[value])
+        if(App.elements[value].constructor === Array){
+            for(let element of App.elements[value]){
+                editor.canvas.createObject(element)
+            }
+        }
+        else{
+            editor.canvas.createObject(App.elements[value])
+        }
     },
     renderSVG: () => {
         let svgText = editor.canvas.toSVG()
@@ -198,7 +205,7 @@ export const App = {
         let exportEditor = new fabric.Editor(Object.assign({
             static: true,
             doNotRender: true,
-            plugins: [FmBufferRendering],
+            plugins: [],
             prototypes: editor.prototypes
         },editor.getState()))
         await exportEditor.promise

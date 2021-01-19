@@ -164,7 +164,7 @@ fabric.util.object.extend(fabric.Editor.prototype, {
   _getFileName (filenamePattern,extension, index = ""){
     return ((filenamePattern.includes("*") ? filenamePattern.replace("*",index) : filenamePattern + index));
   },
-  async export( {format = "png", output = "buffer", slide, options}) {
+  async export ( {format = "png", output = "buffer", slide, options}) {
 
     if(!options)options = {}
 

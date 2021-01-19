@@ -204,32 +204,32 @@ Object.assign(fabric.Canvas.prototype, {
     //   this._resetTransformEventData();
     // }
     // else{
-      if(this._activeObject || !this.allowTouchScrolling) {
-        e.preventDefault && e.preventDefault();
+    if(this._activeObject || !this.allowTouchScrolling) {
+      e.preventDefault && e.preventDefault();
+    }
+    let _lastHoveredTarget = this._hoveredTarget;
+    this._hoveredTarget = this.findTarget(e) || null;
+    if(_lastHoveredTarget !== this._hoveredTarget){
+      if(_lastHoveredTarget){
+        let obj = _lastHoveredTarget;
+        obj.fire("blur")
+        this.fire("object:blur",{target:obj})
       }
-      let _lastHoveredTarget = this._hoveredTarget;
-      this._hoveredTarget = this.findTarget(e) || null;
-      if(_lastHoveredTarget !== this._hoveredTarget){
-        if(_lastHoveredTarget){
-          let obj = _lastHoveredTarget;
-          obj.fire("blur")
-          this.fire("object:blur",{target:obj})
-        }
-        if(this._hoveredTarget){
-          let obj = this._hoveredTarget;
-          obj.fire("focus")
-          this.fire("object:focus",{target:obj})
-        }
+      if(this._hoveredTarget){
+        let obj = this._hoveredTarget;
+        obj.fire("focus")
+        this.fire("object:focus",{target:obj})
       }
+    }
 
-      this.updateInteractiveMode(e);
-      // this._applyMixedMode(e);
+    this.updateInteractiveMode(e);
+    // this._applyMixedMode(e);
 
-      if (this._handModeData) {
-        return this._handModeMouseMove(e);
-      } else {
-        this.__onMouseMove(e);
-      }
+    if (this._handModeData) {
+      return this._handModeMouseMove(e);
+    } else {
+      this.__onMouseMove(e);
+    }
     // }
 
   }, /**
@@ -264,6 +264,9 @@ Object.assign(fabric.Canvas.prototype, {
     }
   },
   _updateMixedInteractiveMode(e){
+    if (e.altKey ) {
+      this.isHandMode = true
+    }
     if(this.isHandMode){
       if ( !e.altKey ) {
         if(this._hoveredTarget){
