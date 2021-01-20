@@ -251,6 +251,9 @@ export const FmSticker = {
 			},
 			updateSticker(){
 
+				if(!this.loaded){
+					return
+				}
 				// console.time("sticker");
 				//render object without sticker, scale original image for better tracing
 

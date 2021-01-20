@@ -78,7 +78,7 @@ Bitmap.prototype.copy = function() {
 };
 
 function loadCanvas(element) {
-	if(element.constructor === HTMLCanvasElement){
+	if(element.constructor.name === "HTMLCanvasElement"){
 		 return element;
 	}
 	let imgCanvas = document.createElement("canvas");
