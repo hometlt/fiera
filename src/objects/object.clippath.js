@@ -310,7 +310,8 @@ export const FmCLipPath = {
         }
         this.clipPath.parent = this;
         this.dirty = true;
-        this.canvas && this.canvas.renderAll();
+        // this.canvas && this.canvas.renderAll();
+        this.canvas && this.canvas.requestRenderAll()
       },
       getClipPath() {
         if (this.frame) return;

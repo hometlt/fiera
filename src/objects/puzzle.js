@@ -312,21 +312,20 @@ export const FmTiles = {
 			renderTilesCache() {
 
 				if(!this.puzzle)return;
-				let buffer = this._tileBufferCanvas, bufferCtx = this._tileBufferContext
+				let bc = this._tileBufferCanvas, bufferCtx = this._tileBufferContext
 				if(!this._tileCanvas) {
 					this._tileCanvas = fabric.util.createCanvasElement();
 					this._tileContext = this._tileCanvas.getContext('2d')
-					buffer = this._tileBufferCanvas = fabric.util.createCanvasElement();
-					bufferCtx = this._tileBufferContext = buffer.getContext('2d')
+					bc = this._tileBufferCanvas = fabric.util.createCanvasElement();
+					bufferCtx = this._tileBufferContext = bc.getContext('2d')
 				}
-
 
 				this._tileBufferCanvasScaleX = this.scaleX
 				this._tileBufferCanvasScaleY = this.scaleY
 
 				//TODO 60 MS!!!
-				let w = buffer.width = this._tileCanvas.width = this._calc.tilesWidth * this.scaleX
-				let h = buffer.height = this._tileCanvas.height = this._calc.tilesHeight * this.scaleY
+				let w = bc.width = this._tileCanvas.width = this._calc.tilesWidth * this.scaleX
+				let h = bc.height = this._tileCanvas.height = this._calc.tilesHeight * this.scaleY
 				//	bufferCtx.scale(this.scaleX,this.scaleY)
 				//	bufferCtx.translate(this.width/2,this.height/2)
 
@@ -359,7 +358,6 @@ export const FmTiles = {
 				fabric.currentBuffersStack = []
 				for(let tile of onScreenTiles){
 					let offset = this._getPuzzleOffset(tile.x, tile.y)
-					//
 					// this._tileContext.save();
 					// // Use the identity matrix while clearing the canvas
 					// //bufferCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -369,7 +367,7 @@ export const FmTiles = {
 					// //bufferCtx.save()
 					// this._tileContext.translate(offset.x,offset.y)
 					// this.bufferDrawObject(this._tileContext,false,[[1, 0, 0, 1, 0, 0]]);
-					// //this._tileContext.drawImage(buffer,0,0)
+					// //this._tileContext.drawImage(bc,0,0)
 					// this._tileContext.restore();
 
 
@@ -387,12 +385,16 @@ export const FmTiles = {
 					//this.drawObject(bufferCtx,false,[]);
 					fabric.tilingBuffers = []
 
+					let prevState = {
+						_transformDone: this._transformDone,
+						top:  this.top,
+						left: this.left,
+						angle:  this.angle
+					};
 					if(this.type === "group" || this.type === "template"){
-// 					this._transformDone = true
+						this._transformDone = false
 						bufferCtx.translate(offset.x * this.scaleX,offset.y * this.scaleY)
-						this.___top = this.top
-						this.___left = this.left
-						this.___angle = this.angle
+
 //this.___scaleX = this.scaleX
 //this.___scaleY = this.scaleY
 						this.top = 0;
@@ -410,21 +412,21 @@ export const FmTiles = {
 					this.bufferDrawObject(bufferCtx,false,[[1, 0, 0, 1, 0, 0]]);
 
 					if(this.type === "group" || this.type === "template"){
-// 					delete this._transformDone
 
-						this.top = this.___top
-						this.left = this.___left
-						this.angle = this.___angle
+						this._transformDone = prevState._transformDone
+						this.top = prevState.top
+						this.left = prevState.left
+						this.angle = prevState.angle
 //this.scaleX = this.___scaleX
 //this.scaleY = this.___scaleY
-
 					}
 					else{
 
 					}
 
+
 					delete fabric.tilingBuffers
-					this._tileContext.drawImage(buffer,0,0)
+					this._tileContext.drawImage(bc,0,0)
 					bufferCtx.restore()
 				}
 				delete fabric.currentBuffersStack
