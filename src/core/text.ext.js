@@ -71,31 +71,81 @@ let SyncTextMixin = {
   //   }
   // },
 
-  /**
-   * Renders cursor or selection (depending on what exists)
-   * it does on the contextTop. If contextTop is not available, do nothing.
-   */
-  renderCursorOrSelection: function() {
-    if (!this.isEditing || !this.canvas || !this.canvas.contextTop) {
-      return;
+  renderSelection: function(boundaries, ctx) {
+
+    var selectionStart = this.inCompositionMode ? this.hiddenTextarea.selectionStart : this.selectionStart,
+        selectionEnd = this.inCompositionMode ? this.hiddenTextarea.selectionEnd : this.selectionEnd,
+        isJustify = this.textAlign.indexOf('justify') !== -1,
+        start = this.get2DCursorLocation(selectionStart),
+        end = this.get2DCursorLocation(selectionEnd),
+        startLine = start.lineIndex,
+        endLine = end.lineIndex,
+        startChar = start.charIndex < 0 ? 0 : start.charIndex,
+        endChar = end.charIndex < 0 ? 0 : end.charIndex;
+
+    for (var i = startLine; i <= endLine; i++) {
+      var lineOffset = this._getLineLeftOffset(i) || 0,
+          lineHeight = this.getHeightOfLine(i),
+          realLineHeight = 0, boxStart = 0, boxEnd = 0;
+
+      if (i === startLine) {
+        boxStart = this.__charBounds[startLine][startChar].left;
+        if(this.__lineInfo  && this.__lineInfo[i] && startChar!== 0){
+          if(this.__lineInfo[i].renderedLeft){
+            boxStart += this.__lineInfo[i].renderedLeft
+          }
+        }
+      }
+
+      if (i >= startLine && i < endLine) {
+        boxEnd = isJustify && !this.isEndOfWrapping(i) ? this.width : this.getLineWidth(i) || 5; // WTF is this 5?
+      }
+      else if (i === endLine) {
+        if (endChar === 0) {
+          boxEnd = this.__charBounds[endLine][endChar].left;
+        }
+        else {
+          var charSpacing = this._getWidthOfCharSpacing();
+          boxEnd = this.__charBounds[endLine][endChar - 1].left + this.__charBounds[endLine][endChar - 1].width - charSpacing;
+        }
+        if(this.__lineInfo && this.__lineInfo[i]){
+          if(this.__lineInfo[i].renderedLeft){
+            boxEnd += this.__lineInfo[i].renderedLeft
+          }
+          if(endChar === this.__charBounds[endLine].length - 1){
+            boxEnd += this.__lineInfo[i].renderedRight
+          }
+        }
+
+      }
+
+
+      realLineHeight = lineHeight;
+      if (this.lineHeight < 1 || (i === endLine && this.lineHeight > 1)) {
+        lineHeight /= this.lineHeight;
+      }
+      if (this.inCompositionMode) {
+        ctx.fillStyle = this.compositionColor || 'black';
+        ctx.fillRect(
+            boundaries.left + lineOffset + boxStart,
+            boundaries.top + boundaries.topOffset + lineHeight,
+            boxEnd - boxStart,
+            1);
+      }
+      else {
+        ctx.fillStyle = this.selectionColor;
+        ctx.fillRect(
+            boundaries.left + lineOffset + boxStart,
+            boundaries.top + boundaries.topOffset,
+            boxEnd - boxStart,
+            lineHeight);
+      }
+
+
+      boundaries.topOffset += realLineHeight;
     }
-
-
-    var boundaries = this._getCursorBoundaries(),
-        ctx = this.canvas.contextTop;
-
-    // ctx.save()
-
-    this.clearContextTop(true);
-    ctx.translate(-this._contentOffsetX, -this._contentOffsetY)
-    if (this.selectionStart === this.selectionEnd) {
-      this.renderCursor(boundaries, ctx);
-    }
-    else {
-      this.renderSelection(boundaries, ctx);
-    }
-    ctx.restore();
   },
+
   /*
   @override
    */
@@ -116,10 +166,21 @@ let SyncTextMixin = {
       this.renderSelection(boundaries, ctx);
     }
 
+    let lineOffset = 0;
+    if(this.__lineInfo  && this.__lineInfo[lineIndex]){
+      if( cursorLocation.charIndex!== 0 && this.__lineInfo[lineIndex].renderedLeft){
+        lineOffset += this.__lineInfo[lineIndex].renderedLeft
+      }
+//       if( cursorLocation.charIndex == this.__charBounds[lineIndex].length - 1 && this.__lineInfo[lineIndex].renderedRight){
+//         lineOffset += this.__lineInfo[lineIndex].renderedRight
+//       }
+    }
+
+
     ctx.fillStyle = this.getValueOfPropertyAt(lineIndex, charIndex, 'fill');
     ctx.globalAlpha = this.__isMousedown ? 1 : this._currentCursorOpacity;
     ctx.fillRect(
-        boundaries.left + boundaries.leftOffset - cursorWidth / 2,
+        boundaries.left + boundaries.leftOffset - cursorWidth / 2 + lineOffset,
         topOffset + boundaries.top + dy,
         cursorWidth,
         charHeight)
@@ -277,6 +338,175 @@ Object.assign(fabric.Object.prototype, {
 
 Object.assign(fabric.Text.prototype, SyncTextMixin, {
   /**
+   * Calculate text box height
+   */
+  calcTextHeight: function() {
+    var lineHeight, height = 0;
+    for (var i = 0, len = this._textLines.length; i < len; i++) {
+      lineHeight = this.getHeightOfLine(i);
+      height += (i === len - 1 ? lineHeight / this.lineHeight : lineHeight);
+    }
+    return height;
+  },
+  //added this.__lineInfo support
+  _renderTextDecoration: function(ctx, type) {
+    if (!this[type] && !this.styleHas(type)) {
+      return;
+    }
+    var heightOfLine, size, _size,
+        lineLeftOffset, dy, _dy,
+        line, lastDecoration,
+        leftOffset = this._getLeftOffset(),
+        topOffset = this._getTopOffset(), top,
+        boxStart, boxWidth, charBox, currentDecoration,
+        maxHeight, currentFill, lastFill,
+        charSpacing = this._getWidthOfCharSpacing();
+
+    for (var i = 0, len = this._textLines.length; i < len; i++) {
+      heightOfLine = this.getHeightOfLine(i);
+      if (!this[type] && !this.styleHas(type, i)) {
+        topOffset += heightOfLine;
+        continue;
+      }
+      line = this._textLines[i];
+      maxHeight = heightOfLine / this.lineHeight;
+      lineLeftOffset = this._getLineLeftOffset(i);
+      if(this.__lineInfo  && this.__lineInfo[i]){
+        lineLeftOffset += this.__lineInfo[i].renderedLeft
+      }
+      boxStart = 0;
+      boxWidth = 0;
+      lastDecoration = this.getValueOfPropertyAt(i, 0, type);
+      lastFill = this.getValueOfPropertyAt(i, 0, 'fill');
+      top = topOffset + maxHeight * (1 - this._fontSizeFraction);
+      size = this.getHeightOfChar(i, 0);
+      dy = this.getValueOfPropertyAt(i, 0, 'deltaY');
+      for (var j = 0, jlen = line.length; j < jlen; j++) {
+        charBox = this.__charBounds[i][j];
+        currentDecoration = this.getValueOfPropertyAt(i, j, type);
+        currentFill = this.getValueOfPropertyAt(i, j, 'fill');
+        _size = this.getHeightOfChar(i, j);
+        _dy = this.getValueOfPropertyAt(i, j, 'deltaY');
+        if ((currentDecoration !== lastDecoration || currentFill !== lastFill || _size !== size || _dy !== dy) &&
+            boxWidth > 0) {
+          ctx.fillStyle = lastFill;
+          lastDecoration && lastFill && ctx.fillRect(
+              leftOffset + lineLeftOffset + boxStart,
+              top + this.offsets[type] * size + dy,
+              boxWidth,
+              this.fontSize / 15
+          );
+          boxStart = charBox.left;
+          boxWidth = charBox.width;
+          lastDecoration = currentDecoration;
+          lastFill = currentFill;
+          size = _size;
+          dy = _dy;
+        }
+        else {
+          boxWidth += charBox.kernedWidth;
+        }
+      }
+      ctx.fillStyle = currentFill;
+      currentDecoration && currentFill && ctx.fillRect(
+          leftOffset + lineLeftOffset + boxStart,
+          top + this.offsets[type] * size + dy,
+          boxWidth - charSpacing,
+          this.fontSize / 15
+      );
+      topOffset += heightOfLine;
+    }
+    // if there is text background color no
+    // other shadows should be casted
+    this._removeShadow(ctx);
+  },
+  //added this.__lineInfo support
+  _renderTextLinesBackground: function(ctx) {
+    if (!this.textBackgroundColor && !this.styleHas('textBackgroundColor')) {
+      return;
+    }
+    var lineTopOffset = 0, heightOfLine,
+        lineLeftOffset, originalFill = ctx.fillStyle,
+        line, lastColor,
+        leftOffset = this._getLeftOffset(),
+        topOffset = this._getTopOffset(),
+        boxStart = 0, boxWidth = 0, charBox, currentColor;
+
+    for (var i = 0, len = this._textLines.length; i < len; i++) {
+      heightOfLine = this.getHeightOfLine(i);
+      if (!this.textBackgroundColor && !this.styleHas('textBackgroundColor', i)) {
+        lineTopOffset += heightOfLine;
+        continue;
+      }
+      line = this._textLines[i];
+      lineLeftOffset = this._getLineLeftOffset(i);
+
+      if(this.__lineInfo  && this.__lineInfo[i]){
+        lineLeftOffset += this.__lineInfo[i].renderedLeft
+      }
+      boxWidth = 0;
+      boxStart = 0;
+      lastColor = this.getValueOfPropertyAt(i, 0, 'textBackgroundColor');
+      for (var j = 0, jlen = line.length; j < jlen; j++) {
+        charBox = this.__charBounds[i][j];
+        currentColor = this.getValueOfPropertyAt(i, j, 'textBackgroundColor');
+        if (currentColor !== lastColor) {
+          ctx.fillStyle = lastColor;
+
+          lastColor && ctx.fillRect(
+              leftOffset + lineLeftOffset + boxStart,
+              topOffset + lineTopOffset,
+              boxWidth,
+              heightOfLine / this.lineHeight
+          );
+          boxStart = charBox.left;
+          boxWidth = charBox.width;
+          lastColor = currentColor;
+        }
+        else {
+          boxWidth += charBox.kernedWidth;
+        }
+      }
+      if (currentColor) {
+        ctx.fillStyle = currentColor;
+        ctx.fillRect(
+            leftOffset + lineLeftOffset + boxStart,
+            topOffset + lineTopOffset,
+            boxWidth,
+            heightOfLine / this.lineHeight
+        );
+      }
+      lineTopOffset += heightOfLine;
+    }
+    ctx.fillStyle = originalFill;
+    // if there is text background color no
+    // other shadows should be casted
+    this._removeShadow(ctx);
+  },
+  getLineWidth: function(lineIndex) {
+    if (this.__lineWidths[lineIndex]) {
+      return this.__lineWidths[lineIndex];
+    }
+
+    var width, line = this._textLines[lineIndex], lineInfo;
+
+    if (line === '') {
+      width = 0;
+    }
+    else {
+      lineInfo = this.measureLine(lineIndex);
+      if(this.useRenderBoundingBoxes){
+        width = lineInfo.width + lineInfo.renderedRight + lineInfo.renderedLeft
+        this.__lineInfo[lineIndex] = lineInfo
+      }
+      else{
+        width = lineInfo.width;
+      }
+    }
+    this.__lineWidths[lineIndex] = width;
+    return width;
+  },
+  /**
    * Initialize or update text dimensions.
    * Updates this.width and this.height with the proper values.
    * Does not return dimensions.
@@ -287,12 +517,18 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
     }
     this._splitText();
     this._clearCache();
+
+
     this.width = this.calcTextWidth() || this.cursorWidth || this.MIN_TEXT_WIDTH;
+
     if (this.textAlign.indexOf('justify') !== -1) {
       // once text is measured we need to make space fatter to make justified text.
       this.enlargeSpaces();
     }
     this.height = this.calcTextHeight();
+    if(this.useRenderBoundingBoxes){
+      this.height += this.__lineInfo[this.__lineInfo.length - 1].renderedBottom
+    }
     this.saveState({ propertySet: '_dimensionAffectingProps' });
 
     this.fire("dimensions:calculated")
@@ -308,6 +544,14 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
         offsets = this._applyPatternGradientTransform(ctx, method === 'fillText' ? this.fill : this.stroke);
 
     for (var i = 0, len = this._textLines.length; i < len; i++) {
+
+
+      let lineOffset = 0
+      if(this.__lineInfo && this.__lineInfo[i]){
+        lineOffset = this.__lineInfo[i].renderedLeft
+      }
+
+
       var heightOfLine = this.getHeightOfLine(i),
           maxHeight = heightOfLine / this.lineHeight,
           leftOffset = this._getLineLeftOffset(i);
@@ -315,7 +559,7 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
           method,
           ctx,
           this._textLines[i],
-          left + leftOffset - offsets.offsetX,
+          left + leftOffset - offsets.offsetX + lineOffset,
           top + lineHeights + maxHeight - offsets.offsetY,
           i
       );
@@ -342,6 +586,11 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
     this._textLines = newLines.graphemeLines;
     this._unwrappedTextLines = newLines._unwrappedLines;
     this._text = newLines.graphemeText;
+
+    if(this.useRenderBoundingBoxes){
+      this.__lineInfo = []
+    }
+
     return newLines;
   },
   setTextTransform(value){
@@ -431,37 +680,29 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
   },
   renderCharCallback: null,
 
-
-  _renderChars: function(method, ctx, line, left, top, lineIndex) {
-    // set proper line offset
-    var lineHeight = this.getHeightOfLine(lineIndex),
-        isJustify = this.textAlign.indexOf('justify') !== -1,
-        actualStyle,
+  interateTextChunks(lineIndex, foo, iteratorFn){
+    let actualStyle,
         nextStyle,
-        firstChar = 0,
-        charBox,
-        boxWidth = 0,
-        timeToRender,
-        shortCut = !isJustify && this.charSpacing === 0 && (!this._specialArray || !this._specialArray[lineIndex]) && this.isEmptyStyles(lineIndex);
+        firstChar = 0;
+    let specs = this._specialArray
+    let line = this._textLines[lineIndex]
+    let isJustify = this.textAlign.indexOf('justify') !== -1;
+    let shortCut = !isJustify && this.charSpacing === 0 && (!specs || !specs[lineIndex]) && this.isEmptyStyles(lineIndex);
 
-    ctx && ctx.save();
-    top -= lineHeight * this._fontSizeFraction / this.lineHeight;
     if (shortCut) {
       // render all the line in one pass without checking
-      this._renderChar(method, ctx, lineIndex, 0, this.textLines[lineIndex].length, left, top, lineHeight);
-      ctx && ctx.restore();
+      foo(0, line.length)
       return;
     }
-    for (var i = 0, len = line.length - 1; i <= len; i++) {
+
+    let timeToRender;
+
+    for (let i = 0, len = line.length - 1; i <= len; i++) {
       timeToRender = i === len || this.charSpacing;
-      charBox = this.__charBounds[lineIndex][i];
-      if (boxWidth === 0) {
-        left += charBox.kernedWidth - charBox.width;
-        boxWidth += charBox.width;
-      }
-      else {
-        boxWidth += charBox.kernedWidth;
-      }
+
+
+      iteratorFn && iteratorFn(i)
+
       if (isJustify && !timeToRender) {
         if (this._reSpaceAndTab.test(line[i])) {
           timeToRender = true;
@@ -472,20 +713,44 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
         actualStyle = actualStyle || this.getCompleteStyleDeclaration(lineIndex, i);
         nextStyle = this.getCompleteStyleDeclaration(lineIndex, i + 1);
 
-
-        timeToRender =
-            (this._specialArray && this._specialArray[lineIndex] && this._specialArray[lineIndex][i] !== this._specialArray[lineIndex][i + 1]) ||
+        timeToRender = (specs && specs[lineIndex] && specs[lineIndex][i] !== specs[lineIndex][i + 1]) ||
             this._hasStyleChangedForSvg(actualStyle, nextStyle)
       }
 
       if (timeToRender) {
-        this._renderChar(method, ctx, lineIndex, firstChar, i, left, top, lineHeight);
+        foo(firstChar, i)
+
         firstChar = i + 1;
         actualStyle = nextStyle;
-        left += boxWidth;
-        boxWidth = 0;
       }
     }
+  },
+  _renderChars: function(method, ctx, line, left, top, lineIndex) {
+    // set proper line offset
+    var lineHeight = this.getHeightOfLine(lineIndex),
+        charBox,
+        boxWidth = 0;
+
+    ctx && ctx.save();
+
+    top -= lineHeight * this._fontSizeFraction / this.lineHeight;
+
+    this.interateTextChunks(lineIndex,
+        (a,b)=>{
+          this._renderChar(method, ctx, lineIndex, a,b, left, top, lineHeight);
+          left += boxWidth;
+          boxWidth = 0;
+        },
+        (i)=> {
+          charBox = this.__charBounds[lineIndex][i];
+          if (boxWidth === 0) {
+            left += charBox.kernedWidth - charBox.width;
+            boxWidth += charBox.width;
+          } else {
+            boxWidth += charBox.kernedWidth;
+          }
+        })
+
     ctx && ctx.restore();
   },
   _renderChar: function(method, ctx, lineIndex, charIndex, endCharIndex, left, top) {
@@ -895,37 +1160,46 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
     this._renderTextDecoration(ctx, 'linethrough');
     ctx.restore()
   },
-  setSpacingBox(options){
-    this.spacingBox = this.canvas.createObject(options)
-
-    this.on("rotating moving scaling skewing modified dimensions:calculated",()=>{
-      this.spacing = null;
-      this._renderTextCommon(null, 'calc');
-
-      let spacing = this.spacing;
-      let width = this.width, height = this.height, left = this.left, top = this.top
-
-      if(spacing){
-        width += spacing.left + spacing.right
-        height += spacing.top + spacing.bottom
-
-        let rad = fabric.util.degreesToRadians(this.angle)
-        top -= spacing.top * Math.cos(rad) * this.scaleY
-        left += spacing.top * Math.sin(rad) * this.scaleY
-        top -= spacing.left * Math.sin(rad) *  this.scaleX
-        left -= spacing.left  * Math.cos(rad)* this.scaleX
-      }
-
-      this.spacingBox.set({
-        width, height, left, top,
-        scaleX: this.scaleX,
-        scaleY: this.scaleY,
-        angle: this.angle,
-        originX: this.originX,
-        originY: this.originY
-      })
-    })
-  }
+  // setSpacingBox(options){
+  //   if(!options){
+  //     if(this._spacingBoxNoImplementedWarning)return
+  //     this._spacingBoxNoImplementedWarning = true
+  //     console.log("spacing box set to null is not implemented")
+  //     return;
+  //   }
+  //
+  //   this.spacingBox = this.canvas.createObject(options)
+  //
+  //   this.on("scaling skewing modified dimensions:calculated",(e)=>{
+  //     this.spacing = null;
+  //     this._renderTextCommon(null, 'calc');
+  //   })
+  //
+  //   this.on("rotating moving scaling skewing modified dimensions:calculated",(e)=>{
+  //     let spacing = this.spacing;
+  //     let width = this.width, height = this.height, left = this.left, top = this.top
+  //
+  //     if(spacing){
+  //       width += spacing.left + spacing.right
+  //       height += spacing.top + spacing.bottom
+  //
+  //       let rad = fabric.util.degreesToRadians(this.angle)
+  //       top -= spacing.top * Math.cos(rad) * this.scaleY
+  //       left += spacing.top * Math.sin(rad) * this.scaleY
+  //       top -= spacing.left * Math.sin(rad) *  this.scaleX
+  //       left -= spacing.left  * Math.cos(rad)* this.scaleX
+  //     }
+  //
+  //     this.spacingBox.set({
+  //       width, height, left, top,
+  //       scaleX: this.scaleX,
+  //       scaleY: this.scaleY,
+  //       angle: this.angle,
+  //       originX: this.originX,
+  //       originY: this.originY
+  //     })
+  //   })
+  // }
 });
 
 Object.assign(fabric.IText.prototype,SyncTextMixin,  {
@@ -1002,6 +1276,50 @@ Object.assign(fabric.IText.prototype,SyncTextMixin,  {
     }
   },
   lockOnEdit: true,
+  getSelectionStartFromPointer: function(e) {
+    var mouseOffset = this.getLocalPointer(e),
+        prevWidth = 0,
+        width = 0,
+        height = 0,
+        charIndex = 0,
+        lineIndex = 0,
+        lineLeftOffset,
+        line;
+
+    for (var i = 0, len = this._textLines.length; i < len; i++) {
+      if (height <= mouseOffset.y) {
+        height += this.getHeightOfLine(i) * this.scaleY;
+        lineIndex = i;
+        if (i > 0) {
+          charIndex += this._textLines[i - 1].length + this.missingNewlineOffset(i - 1);
+        }
+      }
+      else {
+        break;
+      }
+    }
+    lineLeftOffset = this._getLineLeftOffset(lineIndex);
+
+
+    if(this.__lineInfo && this.__lineInfo[lineIndex]){
+      lineLeftOffset += this.__lineInfo[lineIndex].renderedLeft
+    }
+
+    width = lineLeftOffset * this.scaleX;
+    line = this._textLines[lineIndex];
+    for (var j = 0, jlen = line.length; j < jlen; j++) {
+      prevWidth = width;
+      // i removed something about flipX here, check.
+      width += this.__charBounds[lineIndex][j].kernedWidth * this.scaleX;
+      if (width <= mouseOffset.x) {
+        charIndex++;
+      }
+      else {
+        break;
+      }
+    }
+    return this._getNewSelectionStartFromOffset(mouseOffset, prevWidth, width, charIndex, jlen);
+  },
   /**
    * @private aded options.e._group for editing texts inside groups
    */

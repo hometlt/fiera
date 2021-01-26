@@ -124,19 +124,6 @@ class DropdownTool extends SelectTool {
     }
 }
 
-class CheckboxTool extends Tool {
-    create(data) {
-        this.input = document.createElement("input")
-        this.input.type = "checkbox"
-        this.input.addEventListener("click", () => {
-            data.change(this.input.checked)
-        })
-        this.inputContainer.append(this.input)
-    }
-    update(value) {
-        this.input.checked = value !== undefined ? !!value : false
-    }
-}
 
 class RangeTool extends Tool {
     create(data){
@@ -229,6 +216,52 @@ class ColorTool extends Tool {
     }
 }
 
+class CheckboxTool extends Tool {
+    create(data) {
+        this.input = document.createElement("input")
+        this.input.type = "checkbox"
+        this.input.hidden = true
+        this.input.addEventListener("click", () => {
+            data.change(this.input.checked)
+        })
+        this.label = createLabel(data)
+        this.label.prepend(this.input)
+        this.inputContainer.append(this.label)
+    }
+    update(value) {
+        this.input.checked = value !== undefined ? !!value : false
+    }
+}
+function createLabel(options){
+    let labelEl = document.createElement("label")
+    if(options.svg){
+        let span = document.createElement("span")
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.innerHTML =`<path d="${options.svg}"/>`
+        document.body.append(svg)
+        let size = svg.getBBox()
+        document.body.removeChild(svg)
+        svg.setAttribute ("viewBox", `${0} ${0} ${size.width + size.x*2} ${size.height+ size.y*2}` );
+        span.append(svg)
+        span.className = options.lblClass
+        // span.className = "tool-button-icon"
+        labelEl.append(span)
+    }
+
+    if(options.label || options.lblClass){
+        let span = document.createElement("span")
+        if(options.label){
+            span.innerText = options.label
+        }
+        if(options.lblClass){
+            span.className = options.lblClass
+        }
+        // span.className = "tool-button"
+        labelEl.append(span)
+    }
+    return labelEl
+}
+
 class OptionsTool extends Tool {
     create(data){
         if(data.options.constructor === Function){
@@ -242,40 +275,16 @@ class OptionsTool extends Tool {
                     class: ""
                 }
             }
-            let label = document.createElement("label")
+            let label = createLabel(option)
             let radio = document.createElement("input")
+            radio.hidden = true
             radio.type = "radio"
             radio.value = option.value
             radio.name = "options-tool-"+this.id
             radio.addEventListener("click", () => {
                 data.change(radio.value)
             })
-            label.append(radio)
-
-            if(option.svg){
-                let span = document.createElement("span")
-                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                svg.innerHTML =`<path d="${option.svg}"/>`
-                document.body.append(svg)
-                let size = svg.getBBox()
-                document.body.removeChild(svg)
-                svg.setAttribute ("viewBox", `${0} ${0} ${size.width + size.x*2} ${size.height+ size.y*2}` );
-                span.append(svg)
-                span.className = "tool-button-icon"
-                label.append(span)
-            }
-
-            if(option.label){
-                let span = document.createElement("span")
-                span.innerText = option.label
-                span.className = "tool-button"
-                label.append(span)
-            }
-            if(option.class){
-                let span = document.createElement("span")
-                span.className = "tool-button-icon " + option.class
-                label.append(span)
-            }
+            label.prepend(radio)
 
             this.inputContainer.append(label)
         }

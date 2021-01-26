@@ -413,6 +413,7 @@ declare module fabric {
     transformMatrix: any[];
     transparentCorners: boolean;
     type: string;
+    effectiveDpi: number;
 
     width: number;
     getWidth(): number;

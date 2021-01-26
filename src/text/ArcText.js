@@ -16,17 +16,17 @@ export const FmArcText = {
     ArcText:{
       type: "arc-text",
       "+_dimensionAffectingProps": ["curvature"],
-      "+cacheProperties": ["curvature","showCurvature"],
+      "+cacheProperties": ["curvature"],
       "+stateProperties": ["curvature"],
       prototype: fabric.IText,
       curvature: 25,
-      showCurvature: true,
-      setShowCurvature(value){
-        this.showCurvature = value
-        if(this.canvas){
-          this.canvas.renderAll()
-        }
-      },
+      // showCurvature: true,
+      // setShowCurvature(value){
+      //   this.showCurvature = value
+      //   if(this.canvas){
+      //     this.canvas.renderAll()
+      //   }
+      // },
       renderCharCallback(method, ctx, lineIndex, charIndex, endCharIndex, left, top, fullDecl){
         for(let index = charIndex; index <= endCharIndex; index++){
           let tr = this._charTransformations[lineIndex][index];
@@ -39,7 +39,7 @@ export const FmArcText = {
         }
       },
       drawControlsInterface (ctx) {
-        if(!this.showCurvature)return
+        // if(!this.showCurvature)return
         ctx.save()
         ctx.strokeStyle = this.borderColor
         ctx.lineWidth = this.borderWidth
@@ -204,6 +204,7 @@ export const FmArcText = {
           let components = []
           let timeToRender,actualStyle,nextStyle
           let lineLength = line.length - 1
+          //todo use this.interateTextChunks
           for (let charIndex = 0; charIndex <= lineLength; charIndex++) {
             timeToRender = charIndex === lineLength;
             components.push(line[charIndex])
@@ -225,7 +226,7 @@ export const FmArcText = {
               else{
 
                 let ff = actualStyle ? actualStyle.fontFamily : this.styles && this.styles[li] && this.styles[li][charIndex] && this.styles[li][charIndex].fontFamily || this.fontFamily;
-                let detected = fabric.fonts.getTextFeatures(components.join(""),fabric.fonts.registry[ff],this.features)
+                let detected = fabric.fonts.getTextFeatures(components.join(""),ff,this.features)
                 for(let detectedInstance of detected){
                   detectedInstance.position += charIndex - components.length + 1
                   detectedFeaturesLines[li].push(detectedInstance)
@@ -236,7 +237,7 @@ export const FmArcText = {
             }
           }
         }
-        
+
         let textHeight = this.calcTextHeight();
         let textWidth = this.calcTextWidth();
         // this._radius =   Math.pow(100-Math.abs(this.curvature),2)
@@ -262,7 +263,17 @@ export const FmArcText = {
 
 
         let ct = this._charTransformations = this.__charBounds.map((row, i) => {
+
           let currentLeft =  -textWidth/2 + this._getLineLeftOffset(i,textWidth)
+
+
+          let lineOffset = 0
+          if(this.__lineInfo){
+            currentLeft += this.__lineInfo[i].renderedLeft
+          }
+
+
+
           let heightOfLine = this.getHeightOfLine(i);
           let charOffset = (heightOfLine - heightOfLine / this.lineHeight) +  heightOfLine * this._fontSizeFraction / this.lineHeight
 
@@ -281,7 +292,7 @@ export const FmArcText = {
             let decl = this._getStyleDeclaration(i, j)
             let deltaY = decl && decl.deltaY || 0
 
-            let bottomRadius,topRadius,charRadius,lineRadius, leftAngle, charAngle ,rightAngle;
+            let bottomRadius,topRadius,charRadius,lineRadius, leftAngle, charAngle ,rightAngle, renderLeftAngle, renderRightAngle;
 
             if(this.curvature > 0){
               bottomRadius = deltaY + rowOffset
@@ -293,6 +304,11 @@ export const FmArcText = {
               leftAngle =  -(currentLeft + bounds.left) / midRadius
               rightAngle =  -(currentLeft + bounds.left + bounds.width) / midRadius
               charAngle = - (currentLeft + bounds.left + bounds.width / 2) / midRadius
+              if(this.useRenderBoundingBoxes && bounds.contour){
+                renderLeftAngle =  -(currentLeft + bounds.left + bounds.contour.x) / midRadius
+                renderRightAngle =  -(currentLeft + bounds.left + bounds.contour.x + bounds.contour.w) / midRadius
+              }
+
             }else{
               bottomRadius = deltaY + rowOffset
               topRadius = deltaY + rowOffset - heightOfLine
@@ -303,6 +319,10 @@ export const FmArcText = {
               leftAngle = Math.PI +(currentLeft + bounds.left) / midRadius
               rightAngle = Math.PI +(currentLeft + bounds.left + bounds.width) / midRadius
               charAngle = Math.PI + (currentLeft + bounds.left + bounds.width / 2) / midRadius
+              if(this.useRenderBoundingBoxes && bounds.contour){
+                renderLeftAngle = Math.PI +(currentLeft + bounds.left+ bounds.contour.x) / midRadius
+                renderRightAngle = Math.PI +(currentLeft + bounds.left  + bounds.contour.x + bounds.contour.w) / midRadius
+              }
             }
 
             let rsin =  Math.sin(rightAngle),
@@ -310,16 +330,27 @@ export const FmArcText = {
                 lsin = Math.sin(leftAngle),
                 lcos = Math.cos(leftAngle),
                 csin = Math.sin(charAngle),
-                ccos = Math.cos(charAngle);
+                ccos = Math.cos(charAngle),
+                bboxrsin,bboxrcos,bboxlsin,bboxlcos;
 
-            return {
+            if(this.useRenderBoundingBoxes && bounds.contour){
+              bboxrsin =  Math.sin(renderRightAngle)
+              bboxrcos = Math.cos(renderRightAngle)
+              bboxlsin = Math.sin(renderLeftAngle)
+              bboxlcos = Math.cos(renderLeftAngle)
+            }
+
+            let ct = {
               char: this._textLines[i][j],
-              charAngle: charAngle,
-              leftAngle: leftAngle,
-              rightAngle: rightAngle,
-              charRadius: charRadius,
-              bottomRadius: bottomRadius,
-              topRadius: topRadius,
+              charAngle,
+              leftAngle,
+              rightAngle,
+              charRadius,
+              bottomRadius,
+              topRadius,
+              lineRadius,
+              renderLeftAngle,
+              renderRightAngle,
               bl: {x: cx - bottomRadius * lsin, y: cy - bottomRadius * lcos},
               br: {x: cx - bottomRadius * rsin, y: cy - bottomRadius * rcos},
               tl: {x: cx - topRadius * lsin,    y: cy - topRadius * lcos},
@@ -328,6 +359,22 @@ export const FmArcText = {
               nr: {x: cx - lineRadius * rsin,   y: cy - lineRadius * rcos},
               cl: {x: cx - charRadius * csin,   y: cy - charRadius * ccos}
             }
+            if(this.useRenderBoundingBoxes && bounds.contour){
+
+              let isEndLine = i === this._textLines.length - 1
+
+              let contourRadius = isEndLine ? lineRadius + (this.curvature < 0?  1: -1 ) *  this.__lineInfo[i].renderedBottom : bottomRadius;
+
+
+              ct.contour = {
+                bl: {x: cx - contourRadius * bboxlsin, y: cy - contourRadius * bboxlcos},
+                br: {x: cx - contourRadius * bboxrsin, y: cy - contourRadius * bboxrcos},
+                tl: {x: cx - topRadius * bboxlsin,    y: cy - topRadius * bboxlcos},
+                tr: {x: cx - topRadius * bboxrsin,    y: cy - topRadius * bboxrcos}
+              }
+            }
+
+            return ct
           })
         })
 
@@ -369,13 +416,22 @@ export const FmArcText = {
         for(let i =0; i < ct.length; i++) {
           let row = ct[i]
           let isEndLine = i === ct.length - 1
-          for (let cs of row) {
-            let bl = isEndLine ? cs.nl : cs.bl;
-            let br = isEndLine ? cs.nr : cs.br;
-            xMin = Math.min(xMin, cs.tl.x, cs.tr.x, bl.x, br.x)
-            xMax = Math.max(xMax, cs.tl.x, cs.tr.x, bl.x, br.x)
-            yMin = Math.min(yMin, cs.tl.y, cs.tr.y, bl.y, br.y)
-            yMax = Math.max(yMax, cs.tl.y, cs.tr.y, bl.y, br.y)
+          for(let j =0; j < row.length - 1; j++) {
+            let cs = row[j]
+            if(this.useRenderBoundingBoxes && cs.contour){
+              xMin = Math.min(xMin, cs.contour.tl.x, cs.contour.tr.x, cs.contour.bl.x, cs.contour.br.x)
+              xMax = Math.max(xMax, cs.contour.tl.x, cs.contour.tr.x, cs.contour.bl.x, cs.contour.br.x)
+              yMin = Math.min(yMin, cs.contour.tl.y, cs.contour.tr.y, cs.contour.bl.y, cs.contour.br.y)
+              yMax = Math.max(yMax, cs.contour.tl.y, cs.contour.tr.y, cs.contour.bl.y, cs.contour.br.y)
+            }
+            else{
+              let bl = isEndLine ? cs.nl : cs.bl;
+              let br = isEndLine ? cs.nr : cs.br;
+              xMin = Math.min(xMin, cs.tl.x, cs.tr.x, bl.x, br.x)
+              xMax = Math.max(xMax, cs.tl.x, cs.tr.x, bl.x, br.x)
+              yMin = Math.min(yMin, cs.tl.y, cs.tr.y, bl.y, br.y)
+              yMax = Math.max(yMax, cs.tl.y, cs.tr.y, bl.y, br.y)
+            }
           }
         }
 
@@ -406,7 +462,6 @@ export const FmArcText = {
         let endChar = this._charTransformations[line][charEnd-1]
 
 
-
         ctx.beginPath()
         if(this.curvature < 0){
           ctx.arc(this._curvingCenter.x,this._curvingCenter.y,startChar.charRadius+1+offset, - startChar.leftAngle - Math.PI/2,-endChar.rightAngle -Math.PI/2 ,1)
@@ -417,18 +472,32 @@ export const FmArcText = {
         }
         ctx.stroke()
       },
-      _drawTextLinesBackgroundSector(ctx,currentColor,line,charStart,charEnd){
-        ctx.fillStyle = currentColor;
+      _contextSelectBackgroundSector(ctx,line,charStart,charEnd,fullLineRadius){
+
         ctx.beginPath()
-        for (let k = charStart; k < charEnd; k++) {
-          let tr = this._charTransformations[line][k];
-          ctx.moveTo(tr.nr.x, tr.nr.y )
-          ctx.lineTo(tr.nl.x, tr.nl.y )
-          ctx.lineTo(tr.tl.x, tr.tl.y )
-          ctx.lineTo(tr.tr.x, tr.tr.y )
+        let startChar = this._charTransformations[line][charStart];
+        let endChar = this._charTransformations[line][charEnd];
+
+        ctx.moveTo(startChar.tl.x, startChar.tl.y )
+
+        let radius =fullLineRadius? startChar.bottomRadius : startChar.lineRadius
+
+        if(this.curvature < 0){
+          ctx.arc(this._curvingCenter.x,this._curvingCenter.y,radius, - startChar.leftAngle - Math.PI/2,-endChar.rightAngle -Math.PI/2 ,1)
+        }
+        else{
+          ctx.arc(this._curvingCenter.x,this._curvingCenter.y,radius, - startChar.leftAngle - Math.PI/2,-endChar.rightAngle -Math.PI/2 ,0)
+        }
+
+        ctx.lineTo(endChar.tr.x, endChar.tr.y )
+
+        if(this.curvature < 0){
+          ctx.arc(this._curvingCenter.x,this._curvingCenter.y,startChar.topRadius,-endChar.rightAngle -Math.PI/2, - startChar.leftAngle - Math.PI/2 ,0)
+        }
+        else{
+          ctx.arc(this._curvingCenter.x,this._curvingCenter.y,startChar.topRadius,-endChar.rightAngle -Math.PI/2, - startChar.leftAngle - Math.PI/2 ,1)
         }
         ctx.closePath()
-        ctx.fill()
       },
       _renderTextLinesBackground: function(ctx) {
         if (!this.textBackgroundColor && !this.styleHas('textBackgroundColor')) {
@@ -449,14 +518,18 @@ export const FmArcText = {
             currentColor = this.getValueOfPropertyAt(i, j, 'textBackgroundColor');
             if (currentColor !== lastColor) {
               if(lastColor){
-                this._drawTextLinesBackgroundSector(ctx, lastColor, i, charStart, j)
+                ctx.fillStyle = lastColor;
+                this._contextSelectBackgroundSector(ctx, i, charStart, j - 1)
+                ctx.fill()
               }
               charStart = j;
               lastColor = currentColor;
             }
           }
           if (currentColor) {
-            this._drawTextLinesBackgroundSector(ctx, currentColor, i, charStart, j)
+            ctx.fillStyle = currentColor;
+            this._contextSelectBackgroundSector(ctx, i, charStart, j - 1)
+            ctx.fill()
           }
         }
         ctx.fillStyle = originalFill;
@@ -473,31 +546,31 @@ export const FmArcText = {
             endChar = end.charIndex < 0 ? 0 : end.charIndex;
 
         ctx.fillStyle = this.selectionColor;
-        ctx.beginPath()
+        ctx.translate(-this._contentOffsetX,-this._contentOffsetY)
 
         for (let i = startLine; i <= endLine; i++) {
           let charStart = (i === startLine) ? startChar : 0 ,
               charEnd = (i >= startLine && i < endLine) ? this._textLines[i].length : endChar
 
-          let isEndLine = i === endLine;
+          // let isEndLine = i === endLine;
+          // for (let j = charStart; j < charEnd; j++) {
+          //   let tr = this._charTransformations[i][j];
+          //   if(isEndLine){
+          //     ctx.moveTo(tr.nr.x, tr.nr.y )
+          //     ctx.lineTo(tr.nl.x, tr.nl.y )
+          //   }
+          //   else{
+          //     ctx.moveTo(tr.br.x, tr.br.y )
+          //     ctx.lineTo(tr.bl.x, tr.bl.y )
+          //   }
+          //   ctx.lineTo(tr.tl.x,tr.tl.y)
+          //   ctx.lineTo(tr.tr.x,tr.tr.y)
+          // }
 
-          for (let j = charStart; j < charEnd; j++) {
-            let tr = this._charTransformations[i][j];
-            if(isEndLine){
-              ctx.moveTo(tr.nr.x, tr.nr.y )
-              ctx.lineTo(tr.nl.x, tr.nl.y )
-            }
-            else{
-              ctx.moveTo(tr.br.x, tr.br.y )
-              ctx.lineTo(tr.bl.x, tr.bl.y )
-            }
-            ctx.lineTo(tr.tl.x,tr.tl.y)
-            ctx.lineTo(tr.tr.x,tr.tr.y)
-          }
+          this._contextSelectBackgroundSector(ctx,i,charStart,charEnd - 1, i !== endLine)
+          ctx.fill();
         }
 
-        ctx.closePath()
-        ctx.fill();
       },
       renderCursor(boundaries, ctx) {
         let cursorLocation = this.get2DCursorLocation(),
@@ -513,6 +586,7 @@ export const FmArcText = {
         let tr = this._charTransformations[cursorLocation.lineIndex][cursorLocation.charIndex];
 
         ctx.save();
+        ctx.translate(-this._contentOffsetX,-this._contentOffsetY)
         ctx.lineWidth = cursorWidth
         ctx.strokeStyle = this.getValueOfPropertyAt(lineIndex, charIndex, 'fill');
         ctx.globalAlpha = this.__isMousedown ? 1 : this._currentCursorOpacity;
@@ -547,28 +621,28 @@ export const FmArcText = {
         this.curvature = value;
         this.updateState();
       },
-      actions: {
-        showCurvature: {
-          className: "far fa-pen-square",
-          type: "checkbox",
-        },
-        curvature: {
-          className: "far fa-circle",
-          action: function(target){
-            if(target.curvature) {
-              target.__lastCurvature = target.curvature;
-              target.setCurvature(0)
-            }else{
-              target.setCurvature(target.__lastCurvature || 100 )
-            }
-          },
-          type: "range",
-          title: "curvature",
-          min: -90,
-          max: 90,
-          fixed: 0
-        }
-      }
+      // actions: {
+      //   showCurvature: {
+      //     className: "far fa-pen-square",
+      //     type: "checkbox",
+      //   },
+      //   curvature: {
+      //     className: "far fa-circle",
+      //     action: function(target){
+      //       if(target.curvature) {
+      //         target.__lastCurvature = target.curvature;
+      //         target.setCurvature(0)
+      //       }else{
+      //         target.setCurvature(target.__lastCurvature || 100 )
+      //       }
+      //     },
+      //     type: "range",
+      //     title: "curvature",
+      //     min: -90,
+      //     max: 90,
+      //     fixed: 0
+      //   }
+      // }
     }
   }
 } 

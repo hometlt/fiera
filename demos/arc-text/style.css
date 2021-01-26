@@ -1,3 +1,4 @@
+@import "https://pro.fontawesome.com/releases/v5.10.0/css/all.css";
 * {
   box-sizing: border-box;
 }
@@ -43,29 +44,71 @@ body {
   display: flex;
   flex-direction: row;
 }
+#tools > .tool {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+#tools .tool-button,
+#tools .tool-button-icon {
+  border: 1px solid grey;
+  border-radius: 4px;
+  background-color: aliceblue;
+  display: inline-block;
+  height: 29px;
+  line-height: 27px;
+  cursor: pointer;
+  margin-bottom: 5px;
+  margin-right: 4px;
+  padding: 0 5px;
+  text-align: center;
+}
+#tools .tool-button-icon {
+  width: 29px;
+}
 #tools .tool {
-  height: 40px;
   display: inline-flex;
   flex-direction: column;
   font-size: 13px;
   font-family: Arial, sans-serif;
-  margin-right: 10px;
-  margin-bottom: 10px;
+}
+#tools .tool > div {
+  display: flex;
 }
 #tools .tool label {
   margin-bottom: 5px;
 }
 #tools .tool label span {
-  height: 21px;
   display: inline-block;
-  vertical-align: super;
+  padding: 1px;
+}
+#tools .tool label input:disabled + .tool-button,
+#tools .tool label input:disabled + .tool-button-icon {
+  cursor: default;
+  opacity: 0.5;
+  background-color: lightgrey;
+  color: grey;
+}
+#tools .tool label input:disabled + .tool-button svg path,
+#tools .tool label input:disabled + .tool-button-icon svg path {
+  fill: grey;
+}
+#tools .tool label input:checked + .tool-button,
+#tools .tool label input:checked + .tool-button-icon {
+  background: #0075ff;
+  color: white;
+  border: none;
 }
 #tools .tool select {
-  height: 21px;
+  height: 29px;
+  margin-bottom: 5px;
+  margin-right: 4px;
+}
+#tools .tool option {
+  height: 29px;
 }
 #tools .tool input {
   margin-right: 5px;
-  height: 21px;
+  height: 29px;
 }
 #tools .tool input[type=number] {
   width: 50px;
@@ -74,11 +117,11 @@ body {
   margin: 0 5px;
 }
 #tools .tool input[type=checkbox] {
-  width: 21px;
+  width: 29px;
   margin: 0;
 }
-#tools .tool input[type="radio"] {
-  width: 21px;
+#tools .tool input[type=radio] {
+  width: 29px;
   margin-top: 0;
 }
 #render-row {
@@ -95,7 +138,6 @@ body {
 }
 #fiera-area {
   display: flex;
-  padding: 40px;
   box-shadow: inset 1px 1px 10px rgba(0, 0, 0, 0.5);
   overflow: auto;
   position: relative;

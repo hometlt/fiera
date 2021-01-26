@@ -312,7 +312,9 @@ export const FmSticker = {
 					if(!this._stickerEl){
 						this.updateSticker()
 					}
-					this._stickerEl.render(ctx,forClipping)
+					if(this._stickerEl){
+						this._stickerEl.render(ctx,forClipping)
+					}
 				}
 			},
 			setSticker(value) {

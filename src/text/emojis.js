@@ -488,6 +488,11 @@ export const FmEmoji = {
 				let width = 0,charIndex, grapheme, line = this._textLines[lineIndex], prevGrapheme,
 					graphemeInfo, numOfSpaces = 0, lineBounds = new Array(line.length);
 
+				let renderedLeft = 0;
+				let renderedWidth = 0;
+				let renderedBottom = 0;
+				//	let renderedTop = 0;
+
 				this.__charBounds[lineIndex] = lineBounds;
 				for (charIndex = 0; charIndex < line.length; charIndex++) {
 					grapheme = line[charIndex];
@@ -540,9 +545,17 @@ export const FmEmoji = {
 					}else{
 						//normal text
 						graphemeInfo = this._getGraphemeBox(grapheme, lineIndex, charIndex, prevGrapheme);
+
 						lineBounds[charIndex] = graphemeInfo;
 						width += graphemeInfo.kernedWidth;
 						prevGrapheme = grapheme;
+
+						if(graphemeInfo.contour){
+							renderedLeft = Math.max(renderedLeft,  -(graphemeInfo.left + graphemeInfo.contour.x))
+							renderedWidth = Math.max(renderedWidth, graphemeInfo.contour.w+ graphemeInfo.contour.x + graphemeInfo.left)
+							renderedBottom = Math.max(renderedBottom, -graphemeInfo.contour.y)
+							//renderedTop = Math.max(renderedWidth, graphemeInfo.contourW+ graphemeInfo.contourX + graphemeInfo.left)
+						}
 					}
 
 				}
@@ -554,7 +567,15 @@ export const FmEmoji = {
 					kernedWidth: 0,
 					height: this.fontSize
 				};
-				return { width: width, numOfSpaces: numOfSpaces };
+
+				let renderedRight = Math.max(0,renderedWidth - width)
+
+
+				return { width: width, numOfSpaces: numOfSpaces,
+					renderedLeft,
+					renderedBottom,
+					renderedRight
+				};
 			},
 			"^textRenders": ["emojisTextRender"],
 			emojisTextRender: function(method, ctx, _char, decl, alignment, left, top, angle) {

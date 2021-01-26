@@ -1,9 +1,9 @@
 import fs      from 'fs'
 import webpack from 'webpack'
 
-const entryDir = "./demos/nymbl-render/"
+const entryDir = "./demos/arc-text/"
 const entryFile = entryDir + "demo.js"
-const targetDir = "./demos/nymbl-render/js/"
+const targetDir = "./demos/arc-text/js/"
 
 const compiler = webpack({
   mode: "development",

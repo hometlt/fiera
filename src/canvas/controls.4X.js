@@ -28,7 +28,11 @@ fabric.Object.prototype._renderControls = function(ctx, styleOverride) {
     }
     drawControls && this.drawControls(ctx, styleOverride);
 
-    this.drawControlsInterface && this.drawControlsInterface(ctx)
+    if(this.canvas.showControlsGuidlines){
+        this.drawControlsInterface && this.drawControlsInterface(ctx)
+    }
 
     ctx.restore();
 }
+
+fabric.Canvas.prototype.showControlsGuidlines = true;

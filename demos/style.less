@@ -65,7 +65,7 @@ body{
     margin-right: 4px;
     padding: 0 5px;
     text-align: center;
-    background: linear-gradient(to bottom, #bcc6cc, #eee, #bcc6cc);
+    //background: linear-gradient(to bottom, #bcc6cc, #eee, #bcc6cc);
   }
 
   .tool-button-icon {
@@ -73,35 +73,62 @@ body{
   }
 
   .tool {
+    >div{
+      display: flex;
+    }
+
     display: inline-flex;
     flex-direction: column;
     font-size: 13px;
     font-family: Arial, sans-serif;
 
-    label{
+    label {
       margin-bottom: 5px;
+
       span {
         display: inline-block;
         padding: 1px;
       }
+
+      //span.optbtn{
+      //  border: 1px solid grey;
+      //  display: inline-block;
+      //  vertical-align: top;
+      //  width: 29px;
+      //  height: 29px;
+      //  text-align: center;
+      //  line-height: 29px;
+      //  border-radius: 6px;
+      //}
+      //input:checked +span.optbtn{
+      //  box-shadow: 0 0 3px #00eaff inset;
+      //  text-shadow: 0 0 3px #00eaff;
+      //  svg{
+      //    filter: drop-shadow( 0 0 3px #00eaff);
+      //  }
+      //}
 
       input:disabled + .tool-button, input:disabled + .tool-button-icon {
         cursor: default;
         opacity: 0.5;
         background-color: lightgrey;
         color: grey;
-        svg{
-          path{
+
+        svg {
+          path {
             fill: grey;
           }
         }
       }
-      input:checked + .tool-button , input:checked + .tool-button-icon{
-        box-shadow: 0 0 3px #00eaff inset;
-        text-shadow: 0 0 3px #00eaff;
-        svg{
-          filter: drop-shadow( 0 0 3px #00eaff);
-        }
+
+      input:checked + .tool-button, input:checked + .tool-button-icon {
+        background: #0075ff;
+        color: white;
+        border: none;
+        //
+        //svg {
+        //  filter: drop-shadow(0 0 3px #00eaff);
+        //}
       }
     }
 
@@ -130,12 +157,11 @@ body{
       margin: 0;
     }
     input[type=radio] {
-      display: none;
+      //display: none;
       width: 29px;
       margin-top: 0;
     }
   }
-
 }
 
 #render-row {

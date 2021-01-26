@@ -136,6 +136,48 @@ export const FmTyprRender = {
     },
     prototypes: {
         Text: {
+            useRenderBoundingBoxes:true,
+
+            _getGraphemeBoxNative: fabric.Text.prototype._getGraphemeBox,
+            _getGraphemeBox: function(grapheme, lineIndex, charIndex, prevGrapheme,skipLeft){
+                let graphemeInfo = this._getGraphemeBoxNative(grapheme, lineIndex, charIndex, prevGrapheme,skipLeft);
+
+                let style = this.getCompleteStyleDeclaration(lineIndex, charIndex);
+                let ff = style.fontFamily.split(",")[0]
+                // let registry = fabric.fonts.registry[ff];
+
+                let variation = fabric.fonts.getFontVariation(ff, style.fontWeight, style.fontStyle)?.variation
+
+                if(variation){
+                    // let variation = registry.variations[(style.fontStyle === "italic" ? "i" : "n") + (style.fontWeight === "bold" ? "7" : "4")]
+
+                    if (variation.buffer && !variation.typr) {
+                        fabric.fonts.loadTypr(variation)
+                    }
+
+                    if(variation.typr){
+                        let scale = style.fontSize / variation.typr.head.unitsPerEm;
+                        let shape = Typr.U.shapeExtended(variation.typr, grapheme, ff, this.features);
+                        let path = Typr.U.shapeToPath(variation.typr, shape);
+                        let ax = shape.reduce((ax, item) => ax + item.ax, 0)
+
+                        let bbox = Typr.U.getShapePathBbox(path)
+
+                        let baseLine = (this.lineHeight * this.fontSize) -0.9 * style.fontSize
+
+                        graphemeInfo.contour = {
+                            x: bbox.x * scale,
+                            y: baseLine + bbox.y * scale,
+                            w: bbox.width * scale,
+                            h: bbox.height * scale
+                        }
+                        graphemeInfo.contour.t = - baseLine + graphemeInfo.contour.h - graphemeInfo.contour.y
+                        // graphemeInfo.typrPath = path
+
+                    }
+                }
+                return graphemeInfo
+            },
             // initDimensions: function() {
             //     if (this.__skipDimension) {
             //         return;
@@ -156,19 +198,19 @@ export const FmTyprRender = {
             "^textRenders": ["typrRender"],
             typrRender: function (method, ctx, char, decl, alignment, left, top, angle) {
                 let ff = decl.fontFamily.split(",")[0]
-                let fontRegistry = fabric.fonts.registry[ff];
-                let specifiedRenderer = this.renderer || fontRegistry && fontRegistry.renderer;
-                if (!fontRegistry || !fontRegistry.active || specifiedRenderer && specifiedRenderer !== "typr") {
+                let registry = fabric.fonts.registry[ff];
+                let specifiedRenderer = this.renderer || registry && registry.renderer;
+                if (!registry || !registry.active || specifiedRenderer && specifiedRenderer !== "typr") {
                     return false;
                 }
 
-                if(method !=="calc" && !specifiedRenderer && fontRegistry.format !== "svg"){
+                if(method !=="calc" && !specifiedRenderer && registry.format !== "svg"){
                     return false
                 }
 
+                let variation = fabric.fonts.getFontVariation(ff, decl.fontWeight, decl.fontStyle).variation
+                //let variation2 = registry.variations[(decl.fontStyle === "italic" ? "i" : "n") + (decl.fontWeight === "bold" ? "7" : "4")]
 
-                let registry = fabric.fonts.registry[ff]
-                let variation = registry.variations[(decl.fontStyle === "italic" ? "i" : "n") + (decl.fontWeight === "bold" ? "7" : "4")]
 
                 if (!variation.typr) {
                     if(!variation.buffer){
@@ -182,77 +224,74 @@ export const FmTyprRender = {
                 let path = Typr.U.shapeToPath(variation.typr, shape);
                 let ax = shape.reduce((ax,item) => ax+ item.ax,0)
 
-                if(char.trim() && (method === "calc" || true)){
-
-
-                    var theta = angle, cos = fabric.util.cos(theta), sin = fabric.util.sin(theta);
-
-                    let offsetX = this._contentOffsetX || 0
-                    let offsetY = this._contentOffsetY || 0
-                    // var center = this.getCenterPoint();
-                    var rotateMatrix = [cos, sin, -sin, cos, 0, 0],
-                        translateMatrix = [1, 0, 0, 1, left - offsetX, top - offsetY],
-                        finalMatrix = fabric.util.multiplyTransformMatrices(translateMatrix, rotateMatrix);
-
-                    let bbox = Typr.U.getShapePathBbox(path)
-
-                    bbox.x *= scale
-                    bbox.y *= -scale
-                    bbox.width *= scale
-                    bbox.height *= -scale
-
-                    let dc = [
-                        // corners
-                        /*tl:*/ fabric.util.transformPoint({ x: bbox.x, y: bbox.y + bbox.height }, finalMatrix),
-                        /*tr:*/ fabric.util.transformPoint({ x:  bbox.x+ bbox.width, y:bbox.y + bbox.height }, finalMatrix),
-                        /*bl:*/ fabric.util.transformPoint({ x: bbox.x, y: bbox.y }, finalMatrix),
-                        /*br:*/ fabric.util.transformPoint({ x: bbox.x+ bbox.width, y: bbox.y }, finalMatrix)
-                    ]
-
-                    let xmin = Math.min(dc[0].x,dc[1].x,dc[2].x,dc[3].x)
-                    let xmax = Math.max(dc[0].x,dc[1].x,dc[2].x,dc[3].x)
-                    let ymin = Math.min(dc[0].y,dc[1].y,dc[2].y,dc[3].y)
-                    let ymax = Math.max(dc[0].y,dc[1].y,dc[2].y,dc[3].y)
-
-                    // if(ctx){
-                    //     if(alignment=== "center"){
-                    //         ctx.strokeRect(bbox.x - ax * scale / 2 ,bbox.y,bbox.width,bbox.height)
-                    //     }
-                    //     else{
-                    //         ctx.strokeRect(bbox.x,bbox.y,bbox.width,bbox.height)
-                    //     }
-                    // }
-                    //
-                    // bbox.x += left
-                    // bbox.y += top
-                    // //
-                    // console.log(bbox,char)
-
-
-                    let leftDiff = this.width/2 + xmin //this._translatedX;
-                    let bottomDiff = this.height/2 - ymax
-                    let topDiff = this.height/2 + ymin  //this._translatedY
-                    let rightDiff = this.width/2 - xmax
-
-                    if(leftDiff < 0 || rightDiff < 0 || topDiff < 0 || bottomDiff < 0){
-
-                        if(!this.spacing){
-                            this.spacing = {left: 0, top: 0, bottom: 0, right: 0};
-                        }
-                        if(leftDiff < -1){
-                            this.spacing.left =Math.ceil(-leftDiff)
-                        }
-                        if(rightDiff < -1){
-                            this.spacing.right =Math.ceil( -rightDiff)
-                        }
-                        if(topDiff < -1){
-                            this.spacing.top = Math.ceil(-topDiff)
-                        }
-                        if(bottomDiff < -1){
-                            this.spacing.bottom =Math.ceil( -bottomDiff)
-                        }
-                    }
-                }
+                // if(char.trim() && (method === "calc" || true)){
+                //
+                //
+                //     var theta = angle, cos = fabric.util.cos(theta), sin = fabric.util.sin(theta);
+                //
+                //     let offsetX = this._contentOffsetX || 0
+                //     let offsetY = this._contentOffsetY || 0
+                //     // var center = this.getCenterPoint();
+                //     var rotateMatrix = [cos, sin, -sin, cos, 0, 0],
+                //         translateMatrix = [1, 0, 0, 1, left - offsetX, top - offsetY],
+                //         finalMatrix = fabric.util.multiplyTransformMatrices(translateMatrix, rotateMatrix);
+                //
+                //     let bbox = Typr.U.getShapePathBbox(path)
+                //
+                //     bbox.x *= scale
+                //     bbox.y *= -scale
+                //     bbox.width *= scale
+                //     bbox.height *= -scale
+                //
+                //     let dc = [
+                //         // corners
+                //         /*tl:*/ fabric.util.transformPoint({ x: bbox.x, y: bbox.y + bbox.height }, finalMatrix),
+                //         /*tr:*/ fabric.util.transformPoint({ x: bbox.x+ bbox.width, y:bbox.y + bbox.height }, finalMatrix),
+                //         /*bl:*/ fabric.util.transformPoint({ x: bbox.x, y: bbox.y }, finalMatrix),
+                //         /*br:*/ fabric.util.transformPoint({ x: bbox.x+ bbox.width, y: bbox.y }, finalMatrix)
+                //     ]
+                //
+                //     let xmin = Math.min(dc[0].x,dc[1].x,dc[2].x,dc[3].x)
+                //     let xmax = Math.max(dc[0].x,dc[1].x,dc[2].x,dc[3].x)
+                //     let ymin = Math.min(dc[0].y,dc[1].y,dc[2].y,dc[3].y)
+                //     let ymax = Math.max(dc[0].y,dc[1].y,dc[2].y,dc[3].y)
+                //
+                //     // if(ctx){
+                //     //     if(alignment=== "center"){
+                //     //         ctx.strokeRect(bbox.x - ax * scale / 2 ,bbox.y,bbox.width,bbox.height)
+                //     //     }
+                //     //     else{
+                //     //         ctx.strokeRect(bbox.x,bbox.y,bbox.width,bbox.height)
+                //     //     }
+                //     // }
+                //     // bbox.x += left
+                //     // bbox.y += top
+                //     // console.log(bbox,char)
+                //
+                //     let leftDiff = this.width/2 + xmin //this._translatedX;
+                //     let bottomDiff = this.height/2 - ymax
+                //     let topDiff = this.height/2 + ymin  //this._translatedY
+                //     let rightDiff = this.width/2 - xmax
+                //
+                //     if(leftDiff < 0 || rightDiff < 0 || topDiff < 0 || bottomDiff < 0){
+                //
+                //         if(!this.spacing){
+                //             this.spacing = {left: 0, top: 0, bottom: 0, right: 0};
+                //         }
+                //         if(leftDiff < -1){
+                //             this.spacing.left =Math.ceil(-leftDiff)
+                //         }
+                //         if(rightDiff < -1){
+                //             this.spacing.right =Math.ceil( -rightDiff)
+                //         }
+                //         if(topDiff < -1){
+                //             this.spacing.top = Math.ceil(-topDiff)
+                //         }
+                //         if(bottomDiff < -1){
+                //             this.spacing.bottom =Math.ceil( -bottomDiff)
+                //         }
+                //     }
+                // }
 
                 if(ctx){
                     ctx.save()
