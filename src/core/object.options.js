@@ -129,17 +129,20 @@ export const FmSetters = {
 						this.dirty = true
 						if (groupNeedsUpdate) {
 							this.group.setDirty(true)
+							if(this.canvas && this.canvas.processing)return this
 							if(!isCurrentTramsform){
 								this.group.fire("modified")
 							}
 						}
 					} else if (groupNeedsUpdate && this.stateProperties.indexOf(key) > -1) {
 						this.group.setDirty(true)
+						if(this.canvas && this.canvas.processing)return this
 						if(!isCurrentTramsform) {
 							this.group.fire("modified")
 						}
 					}
 					if (this.canvas) {
+						if(this.canvas && this.canvas.processing)return this
 						if(!isCurrentTramsform) {
 							this.fire("modified", {target: this, original: origValue, modified: value})
 						}
