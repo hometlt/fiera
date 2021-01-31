@@ -1,3 +1,5 @@
 node_modules
 /dist
 /fonts/google/*
+/demos/nymbl-render/js/**
+/demos/arc-text/js/**
