@@ -234,7 +234,7 @@ declare module fabric {
     sourceRoot?: string;
     thumbnailSourceRoot?: string;
     sourceCanvas?: ICanvasOptions;
-    element?: HTMLImageElement | HTMLCanvasElement
+    element?: HTMLImageElement | HTMLCanvasElement;
     fitting?: string;
 
     //crop module
@@ -250,7 +250,7 @@ declare module fabric {
     radius?: number;
   }
 
-  export interface IWarpOptions extends IObjectOptions {
+  export interface IWarpOptions extends IImageOptions {
     subdivisions?: number;
     points?: [number] | [{x: number,y : number}] | false;
     transformations? : false | [{x: number, y: number, c?: boolean | 0 | 1}];
@@ -309,6 +309,7 @@ declare module fabric {
     strokeStyle: string;
     backgroundColor: string;
     group: IGroup;
+    _objects: IObject[];
 
     // constraint properties
     lockMovementX: boolean;
@@ -937,6 +938,7 @@ declare module fabric {
   }
 
   export interface ICanvasOptions extends IStaticCanvasOptions {
+    doNotRender?: boolean;
     canvasType?: string;
     containerClass?: string;
     defaultCursor?: string;

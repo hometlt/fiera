@@ -15,124 +15,118 @@ import {FmOuterCanvas}  	from '../../src/canvas/outer-canvas.js'
 import {FmGoogleFonts} 		from '../../src/fonts/googleFonts.js'
 import {FmStates} 			from '../../src/core/states.js';
 import {FmObservable} 		from '../../src/core/event-listeners.js';
-import '../../src/canvas/controls.4X.js'
 
-// import {FmRelative} 		from "../../src/objects/relative.js";
-// import {FmSpacing}			from '../../src/modules/spacing.js'
 // import {FmTransformations}  from '../../src/modules/transformations.js';
 
-function initFabric(){
-	//Setting Up Fonts and  Emojis Paths
-	let baseUrl = ''
-	fabric.initialize({
-		plugins: [
-			// FmSpacing,
-			FmInitialize,
-			FmSetters,
-			// FmRelative,
-			FmTarget,
-			FmArcText,
-			FmStates,
-			FmTyprRender,
-			// FmFontkitRender,
-			FmEmoji,
-			FmOuterCanvas,
-			FmObservable,
-			FmGoogleFonts,
-			// FmTransformations
-		],
-		mediaRoot: baseUrl,
-		fontsRoot: baseUrl + 'fonts/'
-	})
-	fabric.fonts.calcCharBound = true;
+//Setting Up Fonts and  Emojis Paths
+let baseUrl = ''
+fabric.initialize({
+	plugins: [
+		// FmSpacing,
+		FmInitialize,
+		FmSetters,
+		// FmRelative,
+		FmTarget,
+		FmArcText,
+		FmStates,
+		FmTyprRender,
+		// FmFontkitRender,
+		FmEmoji,
+		FmOuterCanvas,
+		FmObservable,
+		FmGoogleFonts,
+		// FmTransformations
+	],
+	mediaRoot: baseUrl,
+	fontsRoot: baseUrl + 'fonts/'
+})
+fabric.fonts.calcCharBound = true;
 
-	fabric.extendPrototypes({
-		Canvas: {
-			stateful: true
-		},
-		Object: {
-			borderColor: 'rgb(0 142 122)',
-			cornerColor: 'rgb(0 142 122)'
-		},
-		IText: {
-			editingBorderColor: 'rgb(0 142 122)'
-		},
-		Text: {
-			emojisPath: baseUrl + 'emoji/*.svg'
-		}
-	})
-
-	// fabric.fonts.loadFontsDeclarations(fabric.fonts.fallbacks)
-	fabric.fonts.registerFonts({
-		"Mr Dafoe": {
-			// format: 'svg',
-			src: "https://fonts.gstatic.com/s/mrdafoe/v9/lJwE-pIzkS5NXuMMrGiqg7MCxz_C.ttf"
-		},
-		"Sacramento": {
-			// format: 'svg',
-			src: "https://fonts.gstatic.com/s/sacramento/v8/buEzpo6gcdjy0EiZMBUG0CoV_NxLeiw.ttf"
-		},
-		"Faster One": {
-			// format: 'svg',
-			src: "https://fonts.gstatic.com/s/fasterone/v12/H4ciBXCHmdfClFb-vWhfyLuShq63czE.ttf"
-		},
-		'Gilbert Color': {
-			format: 'svg',
-			src: 'color/GilbertColor.otf'
-		},
-		'Bungee Color': {
-			format: 'svg',
-			src: 'color/BungeeColor.ttf'
-		},
-		'Abelone': {
-			format: 'svg',
-			src: 'color/Abelone.otf'
-		},
-		'NTBixa': {
-			format: 'svg',
-			src: 'color/NTBixaColor.otf'
-		},
-		'Playbox': {
-			format: 'svg',
-			src: 'color/PlayboxColor.otf'
-		},
-		'Papyrus': {
-			src: 'custom/Papyrus.ttf'
-		},
-		'JetBrainsMono': {
-			features: {
-				calt: ['--', '---', '==', '===', '!=', '!==', '=!=', '=:=', '=/=', '<=', '>=', '&&', '&&&', '&=', '++', '+++', '***', ';;', '!!', '??', '?:', '?.', '?=', '<:', ':<', ':>', '>:', '<>', '<<<', '>>>', '<<', '>>', '||', '-|', '_|_', '|-', '||-', '|=', '||=', '##', '###', '####', '#{', '#[', ']#', '#(', '#?', '#_', '#_(', '#:', '#!', '#=', '^=', '<$>', '<$', '$>', '<+>', '<+', '+>', '<*>', '<*', '*>', '</', '</>', '/>', '<!--', '<#--', '-->', '->', '->>', '<<-', '<-', '<=<', '=<<', '<<=', '<==', '<=>', '<==>', '==>', '=>', '=>>', '>=>', '>>=', '>>-', '>-', '>--', '-<', '-<<', '>->', '<-<', '<-|', '<=|', '|=>', '|->', '<->', '<~~', '<~', '<~>', '~~', '~~>', '~>', '~-', '-~', '~@', '[||]', '|]', '[|', '|}', '{|', '[<', '>]', '|>', '<|', '||>', '<||', '|||>', '<|||', '<|>', '...', '..', '.=', '.-', '..<', '.?', '::', ':::', ':=', '::=', ':?', ':?>', '//', '///', '/*', '*/', '/=', '//=', '/==', '@_', '__']
-			},
-			src: {
-				n7: 'custom/JetBrainsMono/JetBrainsMono-Bold.ttf',
-				i7: 'custom/JetBrainsMono/JetBrainsMono-Bold-Italic.ttf',
-				i4: 'custom/JetBrainsMono/JetBrainsMono-Italic.ttf',
-				n4: 'custom/JetBrainsMono/JetBrainsMono-Regular.ttf',
-			}
-		}
-	})
-
-	//Setting Up Canvas and Objects controls overflow
-	const canvas =  new fabric.Canvas('canvas')
-	canvas.setDimensions({width: document.body.clientWidth - 100, height: document.body.clientHeight - 110})
-	canvas.setOuterCanvasContainer('fiera-area');
-	canvas.setOuterCanvasOpacity(0.1);
-	canvas.initEventListeners()
-
-	canvas.on('target:changed',({selected})=> {
-		window.target = selected
-	})
-
-	//active object observer
-	canvas.$activeobject = function(callback){
-		this.on('target:changed',({selected,deselected})=>{
-			callback(selected, deselected && deselected[0])
-		})
+fabric.extendPrototypes({
+	Canvas: {
+		stateful: true
+	},
+	Object: {
+		borderColor: 'rgb(0 142 122)',
+		cornerColor: 'rgb(0 142 122)'
+	},
+	IText: {
+		editingBorderColor: 'rgb(0 142 122)'
+	},
+	Text: {
+		emojisPath: baseUrl + 'emoji/*.svg'
 	}
+})
 
-	window.canvas = canvas;
-	window.target = null;
+// fabric.fonts.loadFontsDeclarations(fabric.fonts.fallbacks)
+fabric.fonts.registerFonts({
+	"Mr Dafoe": {
+		// format: 'svg',
+		src: "https://fonts.gstatic.com/s/mrdafoe/v9/lJwE-pIzkS5NXuMMrGiqg7MCxz_C.ttf"
+	},
+	"Sacramento": {
+		// format: 'svg',
+		src: "https://fonts.gstatic.com/s/sacramento/v8/buEzpo6gcdjy0EiZMBUG0CoV_NxLeiw.ttf"
+	},
+	"Faster One": {
+		// format: 'svg',
+		src: "https://fonts.gstatic.com/s/fasterone/v12/H4ciBXCHmdfClFb-vWhfyLuShq63czE.ttf"
+	},
+	'Gilbert Color': {
+		format: 'svg',
+		src: 'color/GilbertColor.otf'
+	},
+	'Bungee Color': {
+		format: 'svg',
+		src: 'color/BungeeColor.ttf'
+	},
+	'Abelone': {
+		format: 'svg',
+		src: 'color/Abelone.otf'
+	},
+	'NTBixa': {
+		format: 'svg',
+		src: 'color/NTBixaColor.otf'
+	},
+	'Playbox': {
+		format: 'svg',
+		src: 'color/PlayboxColor.otf'
+	},
+	'Papyrus': {
+		src: 'custom/Papyrus.ttf'
+	},
+	'JetBrainsMono': {
+		features: {
+			calt: ['--', '---', '==', '===', '!=', '!==', '=!=', '=:=', '=/=', '<=', '>=', '&&', '&&&', '&=', '++', '+++', '***', ';;', '!!', '??', '?:', '?.', '?=', '<:', ':<', ':>', '>:', '<>', '<<<', '>>>', '<<', '>>', '||', '-|', '_|_', '|-', '||-', '|=', '||=', '##', '###', '####', '#{', '#[', ']#', '#(', '#?', '#_', '#_(', '#:', '#!', '#=', '^=', '<$>', '<$', '$>', '<+>', '<+', '+>', '<*>', '<*', '*>', '</', '</>', '/>', '<!--', '<#--', '-->', '->', '->>', '<<-', '<-', '<=<', '=<<', '<<=', '<==', '<=>', '<==>', '==>', '=>', '=>>', '>=>', '>>=', '>>-', '>-', '>--', '-<', '-<<', '>->', '<-<', '<-|', '<=|', '|=>', '|->', '<->', '<~~', '<~', '<~>', '~~', '~~>', '~>', '~-', '-~', '~@', '[||]', '|]', '[|', '|}', '{|', '[<', '>]', '|>', '<|', '||>', '<||', '|||>', '<|||', '<|>', '...', '..', '.=', '.-', '..<', '.?', '::', ':::', ':=', '::=', ':?', ':?>', '//', '///', '/*', '*/', '/=', '//=', '/==', '@_', '__']
+		},
+		src: {
+			n7: 'custom/JetBrainsMono/JetBrainsMono-Bold.ttf',
+			i7: 'custom/JetBrainsMono/JetBrainsMono-Bold-Italic.ttf',
+			i4: 'custom/JetBrainsMono/JetBrainsMono-Italic.ttf',
+			n4: 'custom/JetBrainsMono/JetBrainsMono-Regular.ttf',
+		}
+	}
+})
+
+//Setting Up Canvas and Objects controls overflow
+const canvas =  new fabric.Canvas('canvas')
+canvas.setDimensions({width: document.body.clientWidth - 100, height: document.body.clientHeight - 110})
+canvas.setOuterCanvasContainer('fiera-area')
+canvas.setOuterCanvasOpacity(0.1)
+canvas.initEventListeners()
+
+
+//active object observer
+canvas.$activeobject = function(callback){
+	this.on('target:changed',({selected,deselected})=>{
+		callback(selected, deselected && deselected[0])
+	})
 }
+
+window.canvas = canvas;
+window.target = null;
+
+canvas.on('target:changed',({selected})=> window.target = selected)
 
 function setStyles(...intervals){
 	let style = {};
@@ -178,21 +172,6 @@ let testText =[
 	'4. Common Ligatures: Roboto fl fi ffl ffi',
 	'5. Other Ligatures: JBMono ==>> =>> >><< <<= <<== !=== !!== !== == === ==== ===!='
 ].join('\n')
-
-
-// curvedText1.setFontFamily('Roboto')
-// curvedText1.setCurvature(20)
-// curvedText2.setFontFamily('Roboto')
-// curvedText3.setCurvature(-20)
-// curvedText3.setFontFamily('Roboto')
-//
-// canvas.add(
-// 	curvedText1,
-// 	curvedText2,
-// 	curvedText3
-// )
-
-
 
 let fallbacksTest = [
 	'',
@@ -249,6 +228,7 @@ let fontsArray = [
 	'Bungee Color',
 	'Gilbert Color',
 	'JetBrainsMono',
+	'Papyrus',
 	'Monoton',
 	'NTBixa',
 	'Pacifico',
@@ -260,12 +240,25 @@ let fontsArray = [
 	'Times New Roman'
 ]
 
-initFabric()
-
-// testCurvedText()
-
-// testFonts()
-
+const boundingBoxTest = {
+		contourStrokeWidth: 0.5,
+		contourStroke: "blue",
+		backgroundColor: "rgba(0,0,255,0.05)",
+		backgroundStroke: {
+			stroke: "blue",
+			strokeWidth: 0.5
+		},
+		scaleX: 2,
+		scaleY: 2,
+		type: 'i-text',
+		text: "Mr Dafoe",
+		fontFamily: 'Mr Dafoe',
+		textBackgroundColor: '#ee7dff44',
+		top: 200,
+		radius: 66,
+		left: 100,
+		fontSize: 50
+	}
 
 const boundingBoxTestObjects = {
 	// Roboto: {
@@ -312,6 +305,36 @@ const boundingBoxTestObjects = {
 		top: 200,
 		left: 100,
 		fontSize: 50
+	},
+	MrDafoe100: {
+		backgroundColor: "yellow",
+		type: 'i-text',
+		text: "Mr Dafoe",
+		fontFamily: 'Mr Dafoe',
+		textBackgroundColor: '#ee7dff44',
+		top: 200,
+		left: 400,
+		fontSize: 50,
+		styles: {
+			0: setStyles(
+				{start: 3, end: 8, styles: {fontSize: 100}},
+			)
+		}
+	},
+	MrDafoe25: {
+		backgroundColor: "yellow",
+		type: 'i-text',
+		text: "Mr Dafoe",
+		fontFamily: 'Mr Dafoe',
+		fontSize: 50,
+		textBackgroundColor: '#ee7dff44',
+		top: 500,
+		left: 400,
+		styles: {
+			0: setStyles(
+				{start: 3, end: 8, styles: {fontSize: 25}},
+			)
+		}
 	},
 	Playbox: {
 		backgroundColor: "yellow",
@@ -442,28 +465,28 @@ const fontsTestObjects= {
 const curvedObjects = {
 	curvedText1:{
 		type: "i-text",
-			text: testText,
-			styles,
-			fontFamily: 'Arial',
-			curvature: 20,
-			fontSize: 25,
-			textAlign: 'center',
-			top: 50,
-			left: 300,
-			originX : 'center',
-			width: 400
+		text: testText,
+		styles,
+		fontFamily: 'Arial',
+		curvature: 20,
+		fontSize: 25,
+		textAlign: 'center',
+		top: 50,
+		left: 300,
+		originX : 'center',
+		width: 400
 	},
 	curvedText2 :{
 		type: "i-text",
-			text: testText,
-			styles,
-			fontFamily: 'Arial',
-			fontSize: 25,
-			textAlign: 'center',
-			top: 350,
-			left: 300,
-			originX : 'center',
-			width: 400
+		text: testText,
+		styles,
+		fontFamily: 'Arial',
+		fontSize: 25,
+		textAlign: 'center',
+		top: 350,
+		left: 300,
+		originX : 'center',
+		width: 400
 	},
 	curvedText3: {
 		type: "i-text",
@@ -480,38 +503,64 @@ const curvedObjects = {
 	}
 }
 
-const elementsList = {
-	"Bounding Box": Object.values(boundingBoxTestObjects),
-	"Curving": Object.values(curvedObjects),
-	"Fonts": Object.values(fontsTestObjects),
-	"❌Kerning": [
-		{
-			type: 'i-text',
-			fontSize: 25,
-			renderer: "typr",
-			text: "TYPR renderer: \n1111111111",
-			styles: {
-				1: setStyles({start: 0, end: 10, styles: {fontFamily: 'Mr Dafoe',textBackgroundColor: '#ee7dff44',fontSize: 50}})
-			},
-			top: 100,
-			left: 100
-		},
-		{
-			type: 'i-text',
-			fontSize: 25,
-			renderer: "default",
-			text: "default renderer: \n1111111111",
-			styles: {
-				1: setStyles({start: 0, end: 10, styles: {fontFamily: 'Mr Dafoe',textBackgroundColor: '#ee7dff44',fontSize: 50}})
-			},
-			top: 200,
-			left: 100,
+const MrDafoeTest = [
+	boundingBoxTest,
+	boundingBoxTestObjects.MrDafoe,
+	boundingBoxTestObjects.MrDafoe100,
+	boundingBoxTestObjects.MrDafoe25,
+]
 
-		}
-	]
-}
+const elementsList = [
+
+	{label: "❌Advanced BBox Test",value: boundingBoxTest},
+	{label: "❌FontSize",value: MrDafoeTest},
+	{label: "Various BBox",value:Object.values(boundingBoxTestObjects)},
+	{label: "Curving",value: Object.values(curvedObjects)},
+	{label: "Fonts",value: Object.values(fontsTestObjects)},
+	{label: "❌Kerning",value: [
+			{
+				type: 'i-text',
+				fontSize: 25,
+				renderer: "typr",
+				text: "TYPR renderer: \n1111111111",
+				styles: {
+					1: setStyles({start: 0, end: 10, styles: {fontFamily: 'Mr Dafoe',textBackgroundColor: '#ee7dff44',fontSize: 50}})
+				},
+				top: 100,
+				left: 100
+			},
+			{
+				type: 'i-text',
+				fontSize: 25,
+				renderer: "default",
+				text: "default renderer: \n1111111111",
+				styles: {
+					1: setStyles({start: 0, end: 10, styles: {fontFamily: 'Mr Dafoe',textBackgroundColor: '#ee7dff44',fontSize: 50}})
+				},
+				top: 200,
+				left: 100,
+
+			}
+		]},
+]
 
 const tools = {
+	textBackgroundColor: {
+		caption: 'TextBgColor',
+		type: 'color',
+		change: (value) => target.setStyle('textBackgroundColor', value),
+		value: () => target.getStyle('textBackgroundColor'),
+		enabled: () => target && target.isText,
+		observe: cb => canvas.on('target:changed target:modified $activeobject.mouseup', cb)
+	},
+	textFill: {
+		caption: 'TextFill',
+		type: 'color',
+		change: (value) => target.setStyle('fill', value),
+		value: () => target.getStyle('fill'),
+		enabled: () => target && target.isText,
+		observe: cb => canvas.on('target:changed target:modified $activeobject.mouseup', cb)
+	},
 	fontFamily: {
 		caption: 'Font Family',
 		type: 'select',
@@ -528,14 +577,17 @@ const tools = {
 		value: () => target.getStyle('fontSize'),
 		enabled: () => target && target.isText,
 		observe: cb => canvas.on('target:changed target:modified $activeobject.mouseup', cb)
-	},
-	fontColor: {
-		caption: 'Color',
-		type: 'color',
-		change: (value) => target.setStyle('fill', value),
-		value: () => target.getStyle('fill'),
-		enabled: () => target && target.isText,
-		observe: cb => canvas.on('target:changed target:modified $activeobject.mouseup', cb)
+	}
+}
+
+function createObjects(value){
+	if(value.constructor === Array){
+		for(let element of value){
+			canvas.createObject(element)
+		}
+	}
+	else{
+		canvas.createObject(value)
 	}
 }
 
@@ -543,6 +595,9 @@ createTools({
 	container: 'tools',
 	tools: [
 		tools.fontFamily,
+		tools.textFill,
+		tools.textBackgroundColor,
+		tools.fontSize,
 		{
 			caption: 'Curvature',
 			type: 'group',
@@ -554,10 +609,19 @@ createTools({
 					value: () => canvas.showControlsGuidlines
 				},
 				{
+					type: 'number',
+					min: -500,
+					max: 500,
+					change: (value) => target.setRadius(value),
+					value: () => target.radius,
+					enabled: () => target && target.isText,
+					observe: cb => canvas.on('target:changed target:modified', cb)
+				},
+				{
 					type: 'crange',
 					min: -150,
 					max: 150,
-					on: () => target._lastCurvature || 25,
+					on: () => target._lastCurvature || fabric.ArcText.prototype.curvature,
 					off: () => {target._lastCurvature = target.curvature;return 0},
 					change: (value) => target.setCurvature(value),
 					value: () => target.curvature,
@@ -617,19 +681,8 @@ createTools({
 				{
 					type: 'dropdown',
 					placeholder: "Add Element",
-					options:  () => {
-						return Object.entries(elementsList).map(([key,value]) => ({value: key, label: key}))
-					},
-					change: (value) => {
-						if(elementsList[value].constructor === Array){
-							for(let element of elementsList[value]){
-								canvas.createObject(element)
-							}
-						}
-						else{
-							canvas.createObject(elementsList[value])
-						}
-					}
+					options: elementsList,
+					change: createObjects
 				},
 				{
 					label: 'Clear',
@@ -641,4 +694,60 @@ createTools({
 			]
 		}
 	]
+})
+
+createObjects(boundingBoxTest)
+
+
+canvas.on("$activeobject.moving $activeobject.rotating $activeobject.scaling $activeobject.changed", (event) => {
+	let bbox = target.getBoundingRect()
+	if(bbox.left < 0 || bbox.top < 0 || bbox.left + bbox.width > canvas.width || bbox.top + bbox.height > canvas.height){
+
+		let finalMatrix = target.calcOwnMatrix()
+
+		let intersections = false
+		for(let i =0; i< target._charTransformations.length; i++) {
+			let row = target._charTransformations[i]
+			for (let j =0; j < row.length - 1; j++) {
+				let oX = target._contentOffsetX, oY = target._contentOffsetY
+				let cc = row[j].contour
+				if(cc){
+					let tl = fabric.util.transformPoint({x: cc.tl.x - oX, y: cc.tl.y - oY}, finalMatrix),
+						tr = fabric.util.transformPoint({x: cc.tr.x - oX, y: cc.tr.y - oY}, finalMatrix),
+						bl = fabric.util.transformPoint({x: cc.bl.x - oX, y: cc.bl.y - oY}, finalMatrix),
+						br = fabric.util.transformPoint({x: cc.br.x - oX, y: cc.br.y - oY}, finalMatrix)
+
+					if (tl.x < 0 || tr.x < 0 || br.x < 0 || bl.x < 0 ||
+						tl.y < 0 || tr.y < 0 || br.y < 0 || bl.y < 0 ||
+						tl.x > canvas.width || tr.x > canvas.width || br.x > canvas.width || bl.x > canvas.width ||
+						tl.y > canvas.height || tr.y > canvas.height || br.y > canvas.height || bl.y > canvas.height) {
+						intersections = true
+						if(target.styles?.[i]?.[j]?.contourStroke !== "red"){
+							let pos = target.get1DCursorLocation(i,j)
+							target.setStyleInterval("contourStroke","red",pos,pos+1)
+						}
+					}
+					else{
+						if(target.styles?.[i]?.[j]?.contourStroke !== "blue"){
+							let pos = target.get1DCursorLocation(i,j)
+							target.setStyleInterval("contourStroke","blue",pos,pos+1)
+						}
+					}
+				}
+			}
+		}
+
+		target.__outside = true
+		target.backgroundStroke = {stroke : intersections ? "red" : "yellow", strokeWidth: 1}
+		target.dirty = true;
+
+	}
+	else{
+		if(target.__outside) {
+			target.__outside = false
+			target.backgroundStroke = {stroke: "blue", strokeWidth: 1}
+			target.dirty = true;
+			target.setStyle("contourStroke","blue")
+		}
+	}
 })

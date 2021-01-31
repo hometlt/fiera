@@ -90,7 +90,7 @@ export const FmCLipPath = {
           }
           path.transform(ctx);
           ctx.scale(1 / path.zoomX, 1 / path.zoomY);
-          ctx.translate( -path.cacheTranslationX, -path.cacheTranslationY);
+          // ctx.translate( -path.cacheTranslationX, -path.cacheTranslationY);
           path.drawObject(ctx, true, transformations)
 
           // ctx.globalCompositeOperation = path.inverted ? 'destination-out':'destination-in';

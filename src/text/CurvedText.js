@@ -305,9 +305,6 @@ export default {
                 ctx.restore();
                 this.setCoords();
             },
-            /**
-             * @private
-             */
             _set: function (key, value) {
                 if (key === "text") {
                     this.setText(value);
@@ -353,7 +350,6 @@ export default {
             toString: function () {
                 return '#<fabric.CurvedText (' + this.complexity() + '): { "text": "' + this.text + '", "fontFamily": "' + this.fontFamily + '", "radius": "' + this.radius + '", "spacing": "' + this.spacing + '", "reverse": "' + this.reverse + '" }>';
             },
-            
             /**
              * Returns svg representation of an instance
              * @param {Function} [reviver] Method for further parsing of svg representation.

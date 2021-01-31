@@ -74,19 +74,19 @@ let SyncTextMixin = {
   renderSelection: function(boundaries, ctx) {
 
     var selectionStart = this.inCompositionMode ? this.hiddenTextarea.selectionStart : this.selectionStart,
-        selectionEnd = this.inCompositionMode ? this.hiddenTextarea.selectionEnd : this.selectionEnd,
-        isJustify = this.textAlign.indexOf('justify') !== -1,
-        start = this.get2DCursorLocation(selectionStart),
-        end = this.get2DCursorLocation(selectionEnd),
-        startLine = start.lineIndex,
-        endLine = end.lineIndex,
-        startChar = start.charIndex < 0 ? 0 : start.charIndex,
-        endChar = end.charIndex < 0 ? 0 : end.charIndex;
+      selectionEnd = this.inCompositionMode ? this.hiddenTextarea.selectionEnd : this.selectionEnd,
+      isJustify = this.textAlign.indexOf('justify') !== -1,
+      start = this.get2DCursorLocation(selectionStart),
+      end = this.get2DCursorLocation(selectionEnd),
+      startLine = start.lineIndex,
+      endLine = end.lineIndex,
+      startChar = start.charIndex < 0 ? 0 : start.charIndex,
+      endChar = end.charIndex < 0 ? 0 : end.charIndex;
 
     for (var i = startLine; i <= endLine; i++) {
       var lineOffset = this._getLineLeftOffset(i) || 0,
-          lineHeight = this.getHeightOfLine(i),
-          realLineHeight = 0, boxStart = 0, boxEnd = 0;
+        lineHeight = this.getHeightOfLine(i),
+        realLineHeight = 0, boxStart = 0, boxEnd = 0;
 
       if (i === startLine) {
         boxStart = this.__charBounds[startLine][startChar].left;
@@ -127,18 +127,18 @@ let SyncTextMixin = {
       if (this.inCompositionMode) {
         ctx.fillStyle = this.compositionColor || 'black';
         ctx.fillRect(
-            boundaries.left + lineOffset + boxStart,
-            boundaries.top + boundaries.topOffset + lineHeight,
-            boxEnd - boxStart,
-            1);
+          boundaries.left + lineOffset + boxStart,
+          boundaries.top + boundaries.topOffset + lineHeight,
+          boxEnd - boxStart,
+          1);
       }
       else {
         ctx.fillStyle = this.selectionColor;
         ctx.fillRect(
-            boundaries.left + lineOffset + boxStart,
-            boundaries.top + boundaries.topOffset,
-            boxEnd - boxStart,
-            lineHeight);
+          boundaries.left + lineOffset + boxStart,
+          boundaries.top + boundaries.topOffset,
+          boxEnd - boxStart,
+          lineHeight);
       }
 
 
@@ -151,16 +151,16 @@ let SyncTextMixin = {
    */
   renderCursor: function(boundaries, ctx) {
     var cursorLocation = this.get2DCursorLocation(),
-        lineIndex = cursorLocation.lineIndex,
-        charIndex = cursorLocation.charIndex > 0 ? cursorLocation.charIndex - 1 : 0,
-        charHeight = this.getValueOfPropertyAt(lineIndex, charIndex, 'fontSize'),
-        multiplier = getParentScaleX(this) * this.canvas.getZoom(), //overriden
-        cursorWidth = this.cursorWidth / multiplier,
-        topOffset = boundaries.topOffset,
-        dy = this.getValueOfPropertyAt(lineIndex, charIndex, 'deltaY');
+      lineIndex = cursorLocation.lineIndex,
+      charIndex = cursorLocation.charIndex > 0 ? cursorLocation.charIndex - 1 : 0,
+      charHeight = this.getValueOfPropertyAt(lineIndex, charIndex, 'fontSize'),
+      multiplier = getParentScaleX(this) * this.canvas.getZoom(), //overriden
+      cursorWidth = this.cursorWidth / multiplier,
+      topOffset = boundaries.topOffset,
+      dy = this.getValueOfPropertyAt(lineIndex, charIndex, 'deltaY');
 
     topOffset += (1 - this._fontSizeFraction) * this.getHeightOfLine(lineIndex) / this.lineHeight
-        - charHeight * (1 - this._fontSizeFraction);
+      - charHeight * (1 - this._fontSizeFraction);
 
     if (this.inCompositionMode) {
       this.renderSelection(boundaries, ctx);
@@ -180,10 +180,10 @@ let SyncTextMixin = {
     ctx.fillStyle = this.getValueOfPropertyAt(lineIndex, charIndex, 'fill');
     ctx.globalAlpha = this.__isMousedown ? 1 : this._currentCursorOpacity;
     ctx.fillRect(
-        boundaries.left + boundaries.leftOffset - cursorWidth / 2 + lineOffset,
-        topOffset + boundaries.top + dy,
-        cursorWidth,
-        charHeight)
+      boundaries.left + boundaries.leftOffset - cursorWidth / 2 + lineOffset,
+      topOffset + boundaries.top + dy,
+      cursorWidth,
+      charHeight)
   },
   setProperty: function (property, value) {
     if (this.canvas && this.canvas.stateful) {
@@ -315,9 +315,9 @@ let SyncTextMixin = {
       'font-style': this.getStyle('fontStyle'),
       'font-weight': this.getStyle('bold'),
       'text-decoration':
-          ( this.getStyle('linethrough') ? 'line-through ' : '') +
-          ( this.getStyle('overline') ? 'overline ' : '') +
-          ( this.getStyle('underline') ? 'underline ' : '')
+        ( this.getStyle('linethrough') ? 'line-through ' : '') +
+        ( this.getStyle('overline') ? 'overline ' : '') +
+        ( this.getStyle('underline') ? 'underline ' : '')
     }
   }
 }
@@ -338,6 +338,22 @@ Object.assign(fabric.Object.prototype, {
 
 Object.assign(fabric.Text.prototype, SyncTextMixin, {
   /**
+   * @private
+   * @param {Object} prevStyle
+   * @param {Object} thisStyle
+   */
+  _hasStyleChanged: function(prevStyle, thisStyle) {
+    if(Object.keys(prevStyle).length !== Object.keys(thisStyle).length ){
+      return true
+    }
+    for(let prop in prevStyle){
+      if(prevStyle[prop] !== thisStyle[prop]){
+        return true;
+      }
+    }
+    return false;
+  },
+  /**
    * Calculate text box height
    */
   calcTextHeight: function() {
@@ -354,13 +370,13 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
       return;
     }
     var heightOfLine, size, _size,
-        lineLeftOffset, dy, _dy,
-        line, lastDecoration,
-        leftOffset = this._getLeftOffset(),
-        topOffset = this._getTopOffset(), top,
-        boxStart, boxWidth, charBox, currentDecoration,
-        maxHeight, currentFill, lastFill,
-        charSpacing = this._getWidthOfCharSpacing();
+      lineLeftOffset, dy, _dy,
+      line, lastDecoration,
+      leftOffset = this._getLeftOffset(),
+      topOffset = this._getTopOffset(), top,
+      boxStart, boxWidth, charBox, currentDecoration,
+      maxHeight, currentFill, lastFill,
+      charSpacing = this._getWidthOfCharSpacing();
 
     for (var i = 0, len = this._textLines.length; i < len; i++) {
       heightOfLine = this.getHeightOfLine(i);
@@ -388,13 +404,13 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
         _size = this.getHeightOfChar(i, j);
         _dy = this.getValueOfPropertyAt(i, j, 'deltaY');
         if ((currentDecoration !== lastDecoration || currentFill !== lastFill || _size !== size || _dy !== dy) &&
-            boxWidth > 0) {
+          boxWidth > 0) {
           ctx.fillStyle = lastFill;
           lastDecoration && lastFill && ctx.fillRect(
-              leftOffset + lineLeftOffset + boxStart,
-              top + this.offsets[type] * size + dy,
-              boxWidth,
-              this.fontSize / 15
+            leftOffset + lineLeftOffset + boxStart,
+            top + this.offsets[type] * size + dy,
+            boxWidth,
+            this.fontSize / 15
           );
           boxStart = charBox.left;
           boxWidth = charBox.width;
@@ -409,10 +425,10 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
       }
       ctx.fillStyle = currentFill;
       currentDecoration && currentFill && ctx.fillRect(
-          leftOffset + lineLeftOffset + boxStart,
-          top + this.offsets[type] * size + dy,
-          boxWidth - charSpacing,
-          this.fontSize / 15
+        leftOffset + lineLeftOffset + boxStart,
+        top + this.offsets[type] * size + dy,
+        boxWidth - charSpacing,
+        this.fontSize / 15
       );
       topOffset += heightOfLine;
     }
@@ -426,11 +442,11 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
       return;
     }
     var lineTopOffset = 0, heightOfLine,
-        lineLeftOffset, originalFill = ctx.fillStyle,
-        line, lastColor,
-        leftOffset = this._getLeftOffset(),
-        topOffset = this._getTopOffset(),
-        boxStart = 0, boxWidth = 0, charBox, currentColor;
+      lineLeftOffset, originalFill = ctx.fillStyle,
+      line, lastColor,
+      leftOffset = this._getLeftOffset(),
+      topOffset = this._getTopOffset(),
+      boxStart = 0, boxWidth = 0, charBox, currentColor;
 
     for (var i = 0, len = this._textLines.length; i < len; i++) {
       heightOfLine = this.getHeightOfLine(i);
@@ -454,10 +470,10 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
           ctx.fillStyle = lastColor;
 
           lastColor && ctx.fillRect(
-              leftOffset + lineLeftOffset + boxStart,
-              topOffset + lineTopOffset,
-              boxWidth,
-              heightOfLine / this.lineHeight
+            leftOffset + lineLeftOffset + boxStart,
+            topOffset + lineTopOffset,
+            boxWidth,
+            heightOfLine / this.lineHeight
           );
           boxStart = charBox.left;
           boxWidth = charBox.width;
@@ -470,10 +486,10 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
       if (currentColor) {
         ctx.fillStyle = currentColor;
         ctx.fillRect(
-            leftOffset + lineLeftOffset + boxStart,
-            topOffset + lineTopOffset,
-            boxWidth,
-            heightOfLine / this.lineHeight
+          leftOffset + lineLeftOffset + boxStart,
+          topOffset + lineTopOffset,
+          boxWidth,
+          heightOfLine / this.lineHeight
         );
       }
       lineTopOffset += heightOfLine;
@@ -527,7 +543,14 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
     }
     this.height = this.calcTextHeight();
     if(this.useRenderBoundingBoxes){
-      this.height += this.__lineInfo[this.__lineInfo.length - 1].renderedBottom
+      let lf = this.__lineInfo
+      this.__renderOffsetTop =  isFinite(lf[0].renderedTop) ? this.__lineHeights[0] / this.lineHeight - lf[0].renderedTop : 0
+
+      let paddingBottom = isFinite(lf[lf.length - 1].renderedBottom) ? lf[lf.length - 1].renderedBottom: 0;
+
+
+      this.height += paddingBottom - this.__renderOffsetTop
+      this._translate(0,-this.__renderOffsetTop)
     }
     this.saveState({ propertySet: '_dimensionAffectingProps' });
 
@@ -541,27 +564,29 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
   _renderTextCommon: function(ctx, method) {
     ctx && ctx.save();
     var lineHeights = 0, left = this._getLeftOffset(), top = this._getTopOffset(),
-        offsets = this._applyPatternGradientTransform(ctx, method === 'fillText' ? this.fill : this.stroke);
+      offsets = this._applyPatternGradientTransform(ctx, method === 'fillText' ? this.fill : this.stroke);
 
     for (var i = 0, len = this._textLines.length; i < len; i++) {
 
 
-      let lineOffset = 0
+      let lineOffsetX = 0
+      let lineOffsetY = 0
       if(this.__lineInfo && this.__lineInfo[i]){
-        lineOffset = this.__lineInfo[i].renderedLeft
+        lineOffsetX = this.__lineInfo[i].renderedLeft
+        lineOffsetY = this.__renderOffsetTop
       }
 
 
       var heightOfLine = this.getHeightOfLine(i),
-          maxHeight = heightOfLine / this.lineHeight,
-          leftOffset = this._getLineLeftOffset(i);
+        maxHeight = heightOfLine / this.lineHeight,
+        leftOffset = this._getLineLeftOffset(i);
       this._renderTextLine(
-          method,
-          ctx,
-          this._textLines[i],
-          left + leftOffset - offsets.offsetX + lineOffset,
-          top + lineHeights + maxHeight - offsets.offsetY,
-          i
+        method,
+        ctx,
+        this._textLines[i],
+        left + leftOffset - offsets.offsetX + lineOffsetX,
+        top + lineHeights + maxHeight - offsets.offsetY- lineOffsetY,
+        i
       );
       lineHeights += heightOfLine;
     }
@@ -646,7 +671,7 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
    */
   _wrapSVGTextAndBg: function(textAndBg) {
     let noShadow = true,
-        textDecoration = this.getSvgTextDecoration(this);
+      textDecoration = this.getSvgTextDecoration(this);
     return [
       textAndBg.textBgRects.join(''),
       '\t\t<text xml:space="preserve" ',
@@ -682,8 +707,8 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
 
   interateTextChunks(lineIndex, foo, iteratorFn){
     let actualStyle,
-        nextStyle,
-        firstChar = 0;
+      nextStyle,
+      firstChar = 0;
     let specs = this._specialArray
     let line = this._textLines[lineIndex]
     let isJustify = this.textAlign.indexOf('justify') !== -1;
@@ -691,7 +716,7 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
 
     if (shortCut) {
       // render all the line in one pass without checking
-      foo(0, line.length)
+      foo(0, line.length,null)
       return;
     }
 
@@ -714,11 +739,11 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
         nextStyle = this.getCompleteStyleDeclaration(lineIndex, i + 1);
 
         timeToRender = (specs && specs[lineIndex] && specs[lineIndex][i] !== specs[lineIndex][i + 1]) ||
-            this._hasStyleChangedForSvg(actualStyle, nextStyle)
+          this._hasStyleChanged(actualStyle, nextStyle)
       }
 
       if (timeToRender) {
-        foo(firstChar, i)
+        foo(firstChar, i, actualStyle)
 
         firstChar = i + 1;
         actualStyle = nextStyle;
@@ -728,36 +753,36 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
   _renderChars: function(method, ctx, line, left, top, lineIndex) {
     // set proper line offset
     var lineHeight = this.getHeightOfLine(lineIndex),
-        charBox,
-        boxWidth = 0;
+      charBox,
+      boxWidth = 0;
 
     ctx && ctx.save();
 
     top -= lineHeight * this._fontSizeFraction / this.lineHeight;
 
     this.interateTextChunks(lineIndex,
-        (a,b)=>{
-          this._renderChar(method, ctx, lineIndex, a,b, left, top, lineHeight);
-          left += boxWidth;
-          boxWidth = 0;
-        },
-        (i)=> {
-          charBox = this.__charBounds[lineIndex][i];
-          if (boxWidth === 0) {
-            left += charBox.kernedWidth - charBox.width;
-            boxWidth += charBox.width;
-          } else {
-            boxWidth += charBox.kernedWidth;
-          }
-        })
+      (a,b)=>{
+        this._renderChar(method, ctx, lineIndex, a,b, left, top, lineHeight);
+        left += boxWidth;
+        boxWidth = 0;
+      },
+      (i)=> {
+        charBox = this.__charBounds[lineIndex][i];
+        if (boxWidth === 0) {
+          left += charBox.kernedWidth - charBox.width;
+          boxWidth += charBox.width;
+        } else {
+          boxWidth += charBox.kernedWidth;
+        }
+      })
 
     ctx && ctx.restore();
   },
   _renderChar: function(method, ctx, lineIndex, charIndex, endCharIndex, left, top) {
     var decl = this._getStyleDeclaration(lineIndex, charIndex),
-        fullDecl = this.getCompleteStyleDeclaration(lineIndex, charIndex),
-        shouldFill = method === 'fillText' && fullDecl.fill,
-        shouldStroke = method === 'strokeText' && fullDecl.stroke && fullDecl.strokeWidth;
+      fullDecl = this.getCompleteStyleDeclaration(lineIndex, charIndex),
+      shouldFill = method === 'fillText' && fullDecl.fill,
+      shouldStroke = method === 'strokeText' && fullDecl.stroke && fullDecl.strokeWidth;
 
     if (method !== "calc" && method !== "both" && !shouldStroke && !shouldFill) {
       return;
@@ -785,7 +810,46 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
       this.runCharRendering(method, ctx, text, left, top, 0, fullDecl);
     }
 
+
+
+
     ctx && decl && ctx.restore();
+  },
+  /**
+   * Draws a background for the object big as its untransformed dimensions
+   * @private
+   * @param {CanvasRenderingContext2D} ctx Context to render on
+   */
+  _renderBackground: function(ctx) {
+    if (!this.backgroundColor && !this.backgroundStroke) {
+      return;
+    }
+    var dim = this._getNonTransformedDimensions();
+
+
+    if(this.backgroundColor) {
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(
+        -dim.x / 2,
+        -dim.y / 2,
+        dim.x,
+        dim.y
+      )
+    }
+
+    if(this.backgroundStroke){
+      this._setStrokeStyles(ctx, this.backgroundStroke);
+      ctx.strokeRect(
+        -dim.x / 2,
+        -dim.y / 2,
+        dim.x,
+        dim.y
+      )
+    }
+
+    // if there is background color no other shadows
+    // should be casted
+    this._removeShadow(ctx);
   },
   runCharRendering(method, ctx, _char, left, top, angle, fullDecl, alignment){
     if(ctx){
@@ -1025,14 +1089,14 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
       return false;
     }
     var obj = this.styles, stylesCount = 0, letterCount, stylePropertyValue,
-        allStyleObjectPropertiesMatch = true, graphemeCount = 0, styleObject;
+      allStyleObjectPropertiesMatch = true, graphemeCount = 0, styleObject;
     // eslint-disable-next-line
     for (var p1 in obj) {
       letterCount = 0;
       // eslint-disable-next-line
       for (var p2 in obj[p1]) {
         var styleObject = obj[p1][p2],
-            stylePropertyHasBeenSet = styleObject.hasOwnProperty(property);
+          stylePropertyHasBeenSet = styleObject.hasOwnProperty(property);
 
         stylesCount++;
 
@@ -1087,7 +1151,7 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
     // if we did not return we have to measure something.
     if (!context._measuringContext) {
       context._measuringContext = this.canvas && this.canvas.contextCache ||
-          fabric.util.createCanvasElement().getContext('2d');
+        fabric.util.createCanvasElement().getContext('2d');
     }
     return context._measuringContext;
   },
@@ -1105,9 +1169,9 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
     }
 
     var line = this._textLines[lineIndex],
-        // char 0 is measured before the line cycle because it nneds to char
-        // emptylines
-        maxHeight = this.getHeightOfChar(lineIndex, 0);
+      // char 0 is measured before the line cycle because it nneds to char
+      // emptylines
+      maxHeight = this.getHeightOfChar(lineIndex, 0);
     for (var i = 1, len = line.length; i < len; i++) {
       maxHeight = Math.max(this.getHeightOfChar(lineIndex, i), maxHeight);
     }
@@ -1278,13 +1342,13 @@ Object.assign(fabric.IText.prototype,SyncTextMixin,  {
   lockOnEdit: true,
   getSelectionStartFromPointer: function(e) {
     var mouseOffset = this.getLocalPointer(e),
-        prevWidth = 0,
-        width = 0,
-        height = 0,
-        charIndex = 0,
-        lineIndex = 0,
-        lineLeftOffset,
-        line;
+      prevWidth = 0,
+      width = 0,
+      height = 0,
+      charIndex = 0,
+      lineIndex = 0,
+      lineLeftOffset,
+      line;
 
     for (var i = 0, len = this._textLines.length; i < len; i++) {
       if (height <= mouseOffset.y) {
@@ -1332,12 +1396,12 @@ Object.assign(fabric.IText.prototype,SyncTextMixin,  {
       options.e._group = this.group;
     }
     var newSelectionStart = this.getSelectionStartFromPointer(options.e),
-        currentStart = this.selectionStart,
-        currentEnd = this.selectionEnd;
+      currentStart = this.selectionStart,
+      currentEnd = this.selectionEnd;
     if (
-        (newSelectionStart !== this.__selectionStartOnMouseDown || currentStart === currentEnd)
-        &&
-        (currentStart === newSelectionStart || currentEnd === newSelectionStart)
+      (newSelectionStart !== this.__selectionStartOnMouseDown || currentStart === currentEnd)
+      &&
+      (currentStart === newSelectionStart || currentEnd === newSelectionStart)
     ) {
       return;
     }

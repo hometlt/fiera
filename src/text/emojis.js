@@ -151,7 +151,7 @@ export const FmEmoji = {
 					}
 					if (!timeToRender) {
 						// if we have charSpacing, we render char by char
-						actualStyle = actualStyle || this.getCompleteStyleDeclaration(lineIndex, i);
+							actualStyle = actualStyle || this.getCompleteStyleDeclaration(lineIndex, i);
 						nextStyle = this.getCompleteStyleDeclaration(lineIndex, i + 1);
 						// timeToRender = this._hasStyleChangedForSvg(actualStyle, nextStyle)
 						timeToRender =
@@ -490,8 +490,8 @@ export const FmEmoji = {
 
 				let renderedLeft = 0;
 				let renderedWidth = 0;
-				let renderedBottom = 0;
-				//	let renderedTop = 0;
+				let renderedBottom = -Infinity;
+				let renderedTop = -Infinity
 
 				this.__charBounds[lineIndex] = lineBounds;
 				for (charIndex = 0; charIndex < line.length; charIndex++) {
@@ -504,10 +504,10 @@ export const FmEmoji = {
 						lineBounds[charIndex] = graphemeInfo;
 						prevGrapheme = grapheme;
 					}
+					let style = this.getCompleteStyleDeclaration(lineIndex, charIndex);
 					if (specialObject && specialObject.type === "emoji") {
 						//add emoji symbol
 						if(this.emojisPath ) {
-							let style = this.getCompleteStyleDeclaration(lineIndex, charIndex);
 							graphemeInfo = {
 								width: style.fontSize,
 								left: 0,
@@ -550,11 +550,16 @@ export const FmEmoji = {
 						width += graphemeInfo.kernedWidth;
 						prevGrapheme = grapheme;
 
-						if(graphemeInfo.contour){
-							renderedLeft = Math.max(renderedLeft,  -(graphemeInfo.left + graphemeInfo.contour.x))
-							renderedWidth = Math.max(renderedWidth, graphemeInfo.contour.w+ graphemeInfo.contour.x + graphemeInfo.left)
-							renderedBottom = Math.max(renderedBottom, -graphemeInfo.contour.y)
-							//renderedTop = Math.max(renderedWidth, graphemeInfo.contourW+ graphemeInfo.contourX + graphemeInfo.left)
+						let contourX,contourW,contourH,contourY
+						if (this.useRenderBoundingBoxes && graphemeInfo.contour) {
+							contourX = graphemeInfo.contour.x  * style.fontSize
+							contourW = graphemeInfo.contour.w  * style.fontSize
+							contourH = graphemeInfo.contour.h  * style.fontSize
+							contourY = this._getBaseLine(style.fontSize) + graphemeInfo.contour.y  * style.fontSize
+							renderedLeft = Math.max(renderedLeft,  -(graphemeInfo.left + contourX))
+							renderedWidth = Math.max(renderedWidth,contourW + contourX + graphemeInfo.left)
+							renderedBottom = Math.max(renderedBottom, -contourY)
+							renderedTop = Math.max(renderedTop,  contourY + contourH )
 						}
 					}
 
@@ -571,10 +576,11 @@ export const FmEmoji = {
 				let renderedRight = Math.max(0,renderedWidth - width)
 
 
-				return { width: width, numOfSpaces: numOfSpaces,
+				return { width, numOfSpaces,
 					renderedLeft,
 					renderedBottom,
-					renderedRight
+					renderedRight,
+					renderedTop
 				};
 			},
 			"^textRenders": ["emojisTextRender"],

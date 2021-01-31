@@ -89,16 +89,17 @@ class SelectTool extends Tool {
         if(data.options.constructor === Function){
             data.options = data.options()
         }
-        for (let option of data.options) {
+        for (let i in data.options) {
+            let option = data.options[i]
             if(option.constructor === String){
                 let optionElement = document.createElement("option");
-                optionElement.value = option;
+                optionElement.value = i;
                 optionElement.text = option;
                 this.input.appendChild(optionElement);
             }
             else{
                 let optionElement = document.createElement("option");
-                optionElement.value = option.value;
+                optionElement.value = i;
                 optionElement.text = option.label
                 this.input.appendChild(optionElement);
             }
@@ -108,8 +109,12 @@ class SelectTool extends Tool {
         })
         this.inputContainer.append(this.input)
     }
+    update(value){
+        this.input.value = this.config.options.indexOf(value)
+    }
     change(){
-        this.config.change(this.input.value)
+        let option = this.config.options[this.input.value]
+        this.config.change(option.constructor === String ? option: option.value)
     }
 }
 
@@ -119,7 +124,8 @@ class DropdownTool extends SelectTool {
         this.input.className = "tool-button"
     }
     change(){
-        this.config.change(this.input.value)
+        let option = this.config.options[this.input.value]
+        this.config.change(option.constructor === String ? option: option.value)
         this.input.value = ""
     }
 }

@@ -292,7 +292,7 @@ const CanvasMixin = {
         return output;
     },
     renderAll: function (force) {
-        if(this.editor && this.editor.doNotRender && !force || fabric.isLikelyNode && !this.loaded){
+        if(this.doNotRender || this.editor && this.editor.doNotRender && !force || fabric.isLikelyNode && !this.loaded){
             if(fabric.showDeveloperWarnings){
                 console.warn("render requested, but canvas is not loaded")
             }
@@ -656,7 +656,7 @@ Object.assign(fabric.StaticCanvas.prototype, CanvasMixin, {
                 this.clearContext(this.contextTop);
             }
         }
-        this.addObjects(objects, callback);
+        this.addObjects(objects, callback)
         this.renderAll();
     },
     setWidth: function (value) {

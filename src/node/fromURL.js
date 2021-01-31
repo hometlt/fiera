@@ -1,6 +1,10 @@
 import canvas from 'canvas'
-import request from 'request'
+// import request from 'request'
+import bent from 'bent'
 import fs from 'fs'
+
+
+const getBuffer = bent('buffer')
 
 //fabric.util.imageCache = {}
 // fabric.util.useImageCaching = true;
@@ -78,9 +82,12 @@ fabric.util.loadImagePromise = async function(originalUrl,crossOrigin){
 
 
 				if (url.startsWith('http')) {
-					request.get({url: url, encoding: null}, (err, res, buffer) => {
-						err ? onError(err) : onLoad(buffer)
-					});
+					getBuffer(url)
+						.then(buffer => {
+						 	onLoad(buffer)
+						}).catch(err => {
+							onError(err)
+						})
 				} else {
 					fs.readFile(url, function (err, buffer) {
 						err ? onError(err) : onLoad(buffer)
