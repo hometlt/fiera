@@ -425,70 +425,10 @@ export const FmTiles = {
 					}
 
 
-					delete fabric.tilingBuffers
 					this._tileContext.drawImage(bc,0,0)
 					bufferCtx.restore()
 				}
 				delete fabric.currentBuffersStack
-			},
-			renderTiles(ctx) {
-				if(!this.puzzle)return
-				ctx.save()
-				ctx.setTransform(1,0,0,1,0,0)
-
-				let rectWidth = this._calc.width
-				let rectHeight = this._calc.height
-				let rectLeft
-				let rectTop
-
-				let transform
-				if(this.group){
-					ctx.translate(
-						ctx.canvas.width /2  - this.group.width * this.group.scaleX / 2,
-						ctx.canvas.height /2  - this.group.height * this.group.scaleY / 2)
-					transform = [this.group.scaleX,0,0,this.group.scaleY,0,0]
-				}
-				else{
-					transform = this.canvas.viewportTransform;
-					rectLeft = 0
-					rectTop = 0
-				}
-
-				if(!this._tileCanvas){
-					this.renderTilesCache()
-				}
-
-				//28MS!!!
-				let MatrixClass = fabric.Node && fabric.Node.DOMMatrix || DOMMatrix
-				let matrix = new MatrixClass(transform);
-				this._tilesPattern = ctx.createPattern(this._tileCanvas, 'repeat');
-
-				if(!this.canvas.__forExport){
-					matrix = matrix.scale(fabric.devicePixelRatio)
-				}
-				matrix = matrix.translate(this.left,this.top).rotate(this.angle)
-
-				if(this.originY === "center"){
-					matrix = matrix.translate( this.height/2 *this.scaleX, 0)
-				}
-				if(this.originX === "center"){
-					matrix = matrix.translate( 0, this.width/2 *this.scaleY)
-				}
-				matrix =  matrix.skewX(this.skewX).skewY(this.skewY)
-
-				//TODO 25MS!
-				this._tilesPattern.setTransform(matrix)
-
-				if(this._tileBufferCanvasScaleX !== this.scaleX){
-					ctx.scale(this.scaleX/this._tileBufferCanvasScaleX,1)
-				}
-				if(this._tileBufferCanvasScaleY !== this.scaleY){
-					ctx.scale(1,this.scaleY/this._tileBufferCanvasScaleY)
-				}
-
-				ctx.fillStyle = this._tilesPattern;
-				ctx.fillRect(0,0, rectWidth, rectHeight);
-				ctx.restore()
 			},
 			_tiles: null,
 			updateTiling () {
@@ -536,8 +476,6 @@ export const FmTiles = {
 					})
 				})
 
-
-				// fabric.Intersection.intersectPolygonPolygon
 				let t,l,w,h;
 
 				if(this.group){

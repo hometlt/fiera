@@ -297,7 +297,9 @@ class OptionsTool extends Tool {
     }
     update(value) {
         let el = this.inputContainer.querySelector(`input[value=${value}]`)
-        el.checked = value !== undefined ? !!value : false
+        if(el){
+            el.checked = value !== undefined ? !!value : false
+        }
     }
     enable() {
         this.inputContainer.querySelectorAll(`input`).forEach(i => {

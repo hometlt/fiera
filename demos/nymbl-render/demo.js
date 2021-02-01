@@ -108,6 +108,28 @@ App.create({
         FmBufferRendering
     ],
     elements: {
+        tileInGroup: {
+            "type": "template",
+            "puzzleSpacing": 0,
+            "objects": [{
+                "type": "template-photo-image",
+                "puzzle": {"offsetsX": [{"x": 1, "y": 0.5}, {"x": 1, "y": -0.5}]},
+                "puzzleSpacing": 0,
+                "clipPath": {},
+                "src": "metup.png",
+                "crop": {"top": 0, "left": 0},
+                "top": -1000,
+                "left": -1000,
+                "width": 1000,
+                "height": 1000
+            }],
+            "top": 0,
+            "left": 0,
+            "scaleX": 0.1,
+            "scaleY": 0.1,
+            "width": 2000,
+            "height": 2000
+        },
         rect,
         template,
         autotile,
@@ -142,7 +164,7 @@ App.create({
             {type: "line", stroke: "black", x1: 0, y1: 2714, y2: 2714, x2: 4575,strokeWidth: 1},
             Object.assign({},printGroup,{angle: 90, left: 2715, top: 2716})
         ],
-        warp: {
+     warp: {
             subdivisions: 51,
             webgl: true,
             strokeWidth: 0,
@@ -409,11 +431,12 @@ App.create({
             resizable: true,
             fitting: "cover",
             clipPathFitting: "fit",
+            sourceRoot: fabric.mediaRoot + "photos/"
             // thumbnailSourceRoot: fabric.mediaRoot + "media-thumbnails/",
         },
-        PhotoImage: {
-            sourceRoot: fabric.mediaRoot + "photos/"
-        },
+        // PhotoImage: {
+        //     sourceRoot: fabric.mediaRoot + "photos/"
+        // },
         IText: {
             lockOnEdit: false,
             lockScalingFlip: true,

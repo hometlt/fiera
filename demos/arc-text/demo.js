@@ -504,16 +504,14 @@ const curvedObjects = {
 }
 
 const MrDafoeTest = [
-	boundingBoxTest,
 	boundingBoxTestObjects.MrDafoe,
 	boundingBoxTestObjects.MrDafoe100,
 	boundingBoxTestObjects.MrDafoe25,
 ]
 
 const elementsList = [
-
 	{label: "❌Advanced BBox Test",value: boundingBoxTest},
-	{label: "❌FontSize",value: MrDafoeTest},
+	{label: "❌FontSize Test",value: MrDafoeTest},
 	{label: "Various BBox",value:Object.values(boundingBoxTestObjects)},
 	{label: "Curving",value: Object.values(curvedObjects)},
 	{label: "Fonts",value: Object.values(fontsTestObjects)},
@@ -697,7 +695,6 @@ createTools({
 })
 
 createObjects(boundingBoxTest)
-
 
 canvas.on("$activeobject.moving $activeobject.rotating $activeobject.scaling $activeobject.changed", (event) => {
 	let bbox = target.getBoundingRect()

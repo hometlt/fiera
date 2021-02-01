@@ -22,9 +22,89 @@ export const FmBufferRendering = {
 
 				let obj = objects[i]
 
-				_bufferCtx.save();
-				obj && obj.bufferRender(_bufferCtx,transformations);
-				_bufferCtx.restore();
+				if(obj.puzzle){
+
+					let transform1 = [1,0,0,1,0,0]
+					{
+						var m;
+						if (obj.group && !obj.group._transformDone) {
+							m = obj.calcTransformMatrix();
+						} else {
+							m = obj.calcOwnMatrix();
+						}
+						transformations.push(m);
+					}
+					for(let transform2 of transformations){
+						transform1 = fabric.util.multiplyTransformMatrices(transform1,transform2)
+					}
+					transformations.pop();
+
+					if(!obj._tileCanvas || obj.dirty){
+						obj.renderTilesCache()
+						obj.dirty = false;
+					}
+
+					//28MS!!!
+					let MatrixClass = fabric.Node && fabric.Node.DOMMatrix || DOMMatrix
+					let matrix = new MatrixClass(transform1);
+					obj._tilesPattern = ctx.createPattern(obj._tileCanvas, 'repeat');
+
+					if(obj.originY === "top"){
+						matrix = matrix.translate( 0, -obj.height/2)
+					}
+					if(obj.originX === "left"){
+						matrix = matrix.translate( -obj.width/2 ,0 )
+					}
+					matrix = matrix.scale(1/obj.scaleX,1/obj.scaleY)
+
+					if(!obj.canvas.__forExport){
+						matrix = matrix.scale(fabric.devicePixelRatio)
+					}
+
+					obj._tilesPattern.setTransform(matrix)
+					ctx.fillStyle = obj._tilesPattern;
+
+
+// 				if(obj._tileBufferCanvasScaleX !== obj.scaleX){
+// 					ctx.scale(obj.scaleX/obj._tileBufferCanvasScaleX,1)
+// 				}
+// 				if(obj._tileBufferCanvasScaleY !== obj.scaleY){
+// 					ctx.scale(1,obj.scaleY/obj._tileBufferCanvasScaleY)
+// 				}
+
+					ctx.fillRect(0,0, ctx.canvas.width , ctx.canvas.height);
+
+// 					if(!obj.canvas.__forExport){
+// 						matrix = matrix.scale(fabric.devicePixelRatio)
+// 					}
+// 					matrix = matrix.translate(obj.left,obj.top).rotate(obj.angle)
+
+// 					if(obj.originY === "center"){
+// 						matrix = matrix.translate( obj.height/2 *obj.scaleX, 0)
+// 					}
+// 					if(this.originX === "center"){
+// 						matrix = matrix.translate( 0, obj.width/2 *obj.scaleY)
+// 					}
+// 					matrix =  matrix.skewX(obj.skewX).skewY(obj.skewY)
+
+					//TODO 25MS!
+
+// 					if(obj._tileBufferCanvasScaleX !== obj.scaleX){
+// 						ctx.scale(obj.scaleX/obj._tileBufferCanvasScaleX,1)
+// 					}
+// 					if(obj._tileBufferCanvasScaleY !== obj.scaleY){
+// 						ctx.scale(1,obj.scaleY/obj._tileBufferCanvasScaleY)
+// 					}
+
+// 					for(let transformation of transformations){
+// 						transformation && _bufferCtx.transform.apply(_bufferCtx, transformation);
+// 					}
+
+// 					_bufferCtx.restore()
+				}
+				else{
+					obj.bufferRender(_bufferCtx,transformations);
+				}
 
 				ctx.save();
 				obj._setupCompositeOperation(ctx);
@@ -100,6 +180,8 @@ export const FmBufferRendering = {
 		Object: {
 			bufferDrawObject: function (ctx, forClipping, transformations) {
 				let originalFill = this.fill, originalStroke = this.stroke
+				this._setOpacity(ctx);
+				this._setShadow(ctx, this);
 				if (forClipping) {
 					this.fill = 'black'
 					this.stroke = ''
@@ -116,7 +198,7 @@ export const FmBufferRendering = {
 
 				this._render(ctx)
 				fabric.util.bufferRenderobjects(this.canvas,ctx, this._objects, transformations)
-				//this._drawClipPath(ctx, transformations)
+				this._drawClipPath(ctx, transformations)
 
 				for (let i = 0; i < this.afterRender.length; i++) {
 					this[this.afterRender[i]](ctx, forClipping)
@@ -165,20 +247,15 @@ export const FmBufferRendering = {
 					this[this.beforeRender[i]](ctx, transformations)
 				}
 
-				if(this.puzzle){
-					this.renderTiles(ctx)
+				this._render(ctx)
+				if (this._objects) {
+					ctx.save()
+					ctx.setTransform(1, 0, 0, 1, 0, 0)
+					// ctx.translate(this.width/2,this.height/2)
+					fabric.util.bufferRenderobjects(this.canvas,ctx, this._objects, transformations)
+					ctx.restore()
 				}
-				else{
-					this._render(ctx)
-					if (this._objects) {
-						ctx.save()
-						ctx.setTransform(1, 0, 0, 1, 0, 0)
-						// ctx.translate(this.width/2,this.height/2)
-						fabric.util.bufferRenderobjects(this.canvas,ctx, this._objects, transformations)
-						ctx.restore()
-					}
-					this._drawClipPath(ctx, transformations)
-				}
+				this._drawClipPath(ctx, transformations)
 
 				for (let i = 0; i < this.afterRender.length; i++) {
 					// this[this.afterRender[i]](ctx, false, transformations)

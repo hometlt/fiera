@@ -77,7 +77,7 @@ export const App = {
             plugins: options.plugins,
             libRoot: "./../../lib/",
             mediaRoot: "./../../../media/",
-            fontsRoot: "./../../../fonts/",
+            fontsRoot: "./../../../media/fonts/",
             // mediaRoot: "http://cdn.hometlt.ru/",
             // fontsRoot: "http://cdn.hometlt.ru/fonts/",
             inlineSVG: true

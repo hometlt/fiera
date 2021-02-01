@@ -103,9 +103,12 @@ import clipboard from "./../../polyfills/clipboard.js"
       ctx.strokeStyle="#000000";
       ctx.strokeRect(0,0,element.width + 2,element.height+ 2);
     }
-    let data =  canvas.toDataURL();
-    //clipboard.writeText(data);
-    return data;
+    return new Promise(resolve =>{
+
+      canvas.toBlob((blob)=>{
+        resolve(URL.createObjectURL(blob))
+      })
+    })
   };
 
 

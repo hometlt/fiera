@@ -83,6 +83,10 @@ body {
   display: inline-block;
   padding: 1px;
 }
+#tools .tool label svg {
+  width: 24px;
+  height: 24px;
+}
 #tools .tool label input:disabled + .tool-button,
 #tools .tool label input:disabled + .tool-button-icon {
   cursor: default;
