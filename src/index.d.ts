@@ -60,6 +60,7 @@ declare module fabric {
   }
 
   export interface IObjectOptions {
+    canvas?: ICanvas;
     id?: string;
     prototype?: string;
     angle?: number;
@@ -256,7 +257,7 @@ declare module fabric {
     transformations? : false | [{x: number, y: number, c?: boolean | 0 | 1}];
   }
 
-  export interface IAnyObjectOptions extends ICanvasOptions, IRectOptions, ICircleOptions, ITextOptions ,IPathOptions, IImageOptions, ILineOptions, IGroupOptions, IWarpOptions {
+  export interface IAnyObjectOptions extends ICanvasOptions, IRectOptions, ICircleOptions, ITextOptions ,IPathOptions, IImageOptions, ILineOptions, IGroupOptions, IWarpOptions, IObjectOptions {
   }
 
   export interface IPoint {
@@ -1020,6 +1021,7 @@ declare module fabric {
   };
 
   let ActiveSelection: {
+    new (objects: any[], options?: IAnyObjectOptions): IGroup;
   };
 
   let Canvas: {

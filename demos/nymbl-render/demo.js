@@ -18,6 +18,7 @@ import {
     FmTextEasyEdit,
     FmPdfkit,
     FmTemplates,
+    FmElementsParser,
     FmBufferRendering
 } from "../../src/modules.js";
 
@@ -25,6 +26,8 @@ import tiled from "./data/tiled.js";
 import design from "./data/design.js";
 import template from "./data/template.js";
 import autotile from "./data/autotile.js";
+import {readFileAsText} from "../../plugins/blob-buffers-utils.js";
+import {uploadDialog} from "../../src/util/uploader.js";
 
 let rect = {
     type: "rect",
@@ -105,6 +108,7 @@ App.create({
         FmPdfkit,
         FmTemplates,
         FmTransformations,
+        FmElementsParser,
         FmBufferRendering
     ],
     elements: {
@@ -370,7 +374,7 @@ App.create({
             stretchable: true,
             stretchingOptions: {
                 action: "zoom",
-                margin: 40
+                margin: 20
             },
             snappingToArea: true,
             snappingToObjects: true,
@@ -510,6 +514,34 @@ App.create({
                     label: 'Clear',
                     type: 'button',
                     click: App.clearCanvas
+                },
+                {
+                    type: 'button',
+                    label: 'Import',
+                    click: ()=>{
+                        uploadDialog({
+                            multiple: false,
+                            accept: "image/svg+xml",
+                            onRead: (image,file) => {
+                                readFileAsText(file).then(text => {
+                                    App.canvas.loadFromSvg(text)
+
+
+
+
+                                    var sel = new fabric.ActiveSelection(canvas.getObjects(), {
+                                        canvas: canvas,
+                                    });sel.scaleX = 0.5; sel.scaleY = 0.5;
+                                    canvas.setActiveObject(sel);
+                                    canvas.requestRenderAll();
+                                    canvas.discardActiveObject()
+
+
+                                    App.canvas.setViewportTransform([0.5, 0, 0, 0.5, 10, 10] )
+                                })
+                            }
+                        })
+                    }
                 }
             ]
         },

@@ -130,6 +130,9 @@ export const FmArcText = {
             selectedLine++;
           }
         }
+        if(selectedLine >= this._textLines.length){
+          selectedLine = this._textLines.length - 1
+        }
 
         let charIndex = 0;
         for (let i = 0; i < selectedLine; i++) {
@@ -270,12 +273,12 @@ export const FmArcText = {
 
         //calculate curving
 
-        this._charTransformations = []
+        let cts = this._charTransformations = []
 
         let yMin = Infinity, yMax = -Infinity, xMin = Infinity, xMax = -Infinity
 
         for(let i =0 ; i< this.__charBounds.length; i++) {
-          this._charTransformations[i] = []
+          cts[i] = []
           let row = this.__charBounds[i]
 
           let currentLeft = -textWidth / 2 + this._getLineLeftOffset(i, textWidth)
@@ -360,44 +363,59 @@ export const FmArcText = {
               lc: {x: cx - lineRadius * csin, y: cy - lineRadius * ccos}
             }
 
-            if(ct.char?.trim() && this.useRenderBoundingBoxes && bounds.contour){
-              let  cos = fabric.util.cos(-charAngle),
+            if(ct.char?.trim() && this.useRenderBoundingBoxes && bounds.contour) {
+              let cos = fabric.util.cos(-charAngle),
                 sin = fabric.util.sin(-charAngle);
 
-              let rotateMatrix =[cos, sin, -sin, cos, 0, 0]
+              let rotateMatrix = [cos, sin, -sin, cos, 0, 0]
               let matrix = fabric.util.multiplyTransformMatrices([1, 0, 0, 1, ct.lc.x, ct.lc.y], rotateMatrix);
-              let x = ct.contour.x -this.__charBounds[i][j].width/2
               let y = ct.contour.y
-              ct.contour.br = fabric.util.transformPoint({x: x + ct.contour.w, y:- y }, matrix);
-              ct.contour.bl = fabric.util.transformPoint({x: x, y: -y }, matrix);
-              ct.contour.tl = fabric.util.transformPoint({x: x, y: -y - ct.contour.h }, matrix);
-              ct.contour.tr = fabric.util.transformPoint({x: x + ct.contour.w, y: -y - ct.contour.h }, matrix);
+              if (this.curvature > 0) {
+                let x = ct.contour.x - this.__charBounds[i][j].width / 2
+                ct.contour.br = fabric.util.transformPoint({x: x + ct.contour.w, y: -y}, matrix);
+                ct.contour.bl = fabric.util.transformPoint({x: x, y: -y}, matrix);
+                ct.contour.tl = fabric.util.transformPoint({x: x, y: -y - ct.contour.h}, matrix);
+                ct.contour.tr = fabric.util.transformPoint({x: x + ct.contour.w, y: -y - ct.contour.h}, matrix);
+              } else {
+                let x = - ct.contour.x + this.__charBounds[i][j].width / 2
+
+                ct.contour.br = fabric.util.transformPoint({x: x - ct.contour.w, y: y}, matrix);
+                ct.contour.bl = fabric.util.transformPoint({x: x, y: y}, matrix);
+                ct.contour.tl = fabric.util.transformPoint({x: x, y: y + ct.contour.h}, matrix);
+                ct.contour.tr = fabric.util.transformPoint({x: x - ct.contour.w, y: y + ct.contour.h}, matrix);
+              }
 
 
-              xMin = Math.min(xMin, ct.contour.br.x,ct.contour.bl.x,ct.contour.tl.x,ct.contour.tr.x)
-              xMax = Math.max(xMax, ct.contour.br.x,ct.contour.bl.x,ct.contour.tl.x,ct.contour.tr.x)
-              yMin = Math.min(yMin, ct.contour.br.y,ct.contour.bl.y,ct.contour.tl.y,ct.contour.tr.y)
-              yMax = Math.max(yMax, ct.contour.br.y,ct.contour.bl.y,ct.contour.tl.y,ct.contour.tr.y)
+              xMin = Math.min(xMin, ct.contour.br.x, ct.contour.bl.x, ct.contour.tl.x, ct.contour.tr.x)
+              xMax = Math.max(xMax, ct.contour.br.x, ct.contour.bl.x, ct.contour.tl.x, ct.contour.tr.x)
+              yMin = Math.min(yMin, ct.contour.br.y, ct.contour.bl.y, ct.contour.tl.y, ct.contour.tr.y)
+              yMax = Math.max(yMax, ct.contour.br.y, ct.contour.bl.y, ct.contour.tl.y, ct.contour.tr.y)
 
             }
 
-
-            this._charTransformations[i][j] = ct
+            cts[i][j] = ct
           }
         }
 
-        this._linesBboxes = []
-        for(let i =0 ; i< this._charTransformations.length; i++) {
-          let bbox = sectorBoundingBox(this._charTransformations[i][0].tl,this._charTransformations[i][this._charTransformations[i].length - 1].tr,this._curvingCenter, this._linesRads[i] + this.__lineHeights[i])
-          let bbox2 = sectorBoundingBox(this._charTransformations[i][0].nl,this._charTransformations[i][this._charTransformations[i].length - 1].nr,this._curvingCenter, this._linesRads[i])
-          this._linesBboxes.push(bbox,bbox2)
+        // this._linesBboxes = []
+        for(let i =0 ; i< cts.length; i++) {
+          let ctsl = cts[i], cta = ctsl[0], ctb = ctsl[ctsl.length - 1], bbox, bbox2
+
+          if (this.curvature > 0) {
+            bbox = sectorBoundingBox(cta.tl, ctb.tr, this._curvingCenter, this._linesRads[i] + this.__lineHeights[i])
+            bbox2 = sectorBoundingBox(cta.nl, ctb.nr, this._curvingCenter, this._linesRads[i])
+          }
+          else{
+            bbox = sectorBoundingBox(ctb.tr,cta.tl , this._curvingCenter, this._linesRads[i] - this.__lineHeights[i])
+            bbox2 = sectorBoundingBox( ctb.nr,cta.nl, this._curvingCenter, this._linesRads[i])
+          }
+          // this._linesBboxes.push(bbox,bbox2)
 
           xMin = Math.min(xMin, bbox.x, bbox2.x)
           xMax = Math.max(xMax, bbox.x+ bbox.width, bbox2.x + bbox2.width)
           yMin = Math.min(yMin, bbox.y, bbox2.y)
           yMax = Math.max(yMax, bbox.y+bbox.height, bbox2.y + bbox2.height)
         }
-
 
         this._enableFontFeatures()
         this._enableDiacritics()
@@ -440,37 +458,37 @@ export const FmArcText = {
           })
         }
 
-        let ct = this._charTransformations
+        let cts = this._charTransformations
         //detected font Features
         for (let li in detectedFeaturesLines) {
           for (let feature of detectedFeaturesLines[li]) {
 
-            let first = ct[li][feature.position];
-            let last = ct[li][feature.position + feature.components.length - 1]
+            let first = cts[li][feature.position];
+            let last = cts[li][feature.position + feature.components.length - 1]
             first.char = feature.components
             first.charAngle = (first.charAngle + last.charAngle) / 2
 
             let midAngle = (first.leftAngle + last.rightAngle) / 2
-            first.cl = {x: cx - first.charRadius * Math.sin(midAngle), y: cy - first.charRadius * Math.cos(midAngle)};
+            first.cl = {x: this._curvingCenter.cx - first.charRadius * Math.sin(midAngle), y: this._curvingCenter.cy - first.charRadius * Math.cos(midAngle)};
 
             for (let fci = 1; fci < feature.components.length; fci++) {
-              delete ct[li][feature.position + fci].char
+              delete cts[li][feature.position + fci].char
             }
           }
         }
       },
       _enableDiacritics(){
-        let ct = this._charTransformations
+        let cts = this._charTransformations
         //Fix Diacritics symbols on a curve
         let diacritics = ['́', '̀', '̂', '̌', '̋', '̏', '̃', '̇', '̣', '·', '̈', 'ː', '̆', '̑', '͗', '̃', '҃', '̩', '̄', '̱', '⃓', '̷', '̵', '̊', '̓', '̒', '̔', '̉', '̛', '̦', '̧', '̡', '̢', '̨', '͝', '͡', '', '͞', '͠']
-        for (let i in ct) {
-          for (let j in ct[i]) {
-            if (ct[i][j].char && diacritics.includes(ct[i][j].char)) {
+        for (let i in cts) {
+          for (let j in cts[i]) {
+            if (cts[i][j].char && diacritics.includes(cts[i][j].char)) {
               for (let k = j; k--;) {
-                if (ct[i][k].char) {
-                  ct[i][k].char += ct[i][j].char
-                  ct[i][j].isDiacritic = true;
-                  delete ct[i][j].char
+                if (cts[i][k].char) {
+                  cts[i][k].char += cts[i][j].char
+                  cts[i][j].isDiacritic = true;
+                  delete cts[i][j].char
                   break;
                 }
               }
@@ -637,9 +655,9 @@ export const FmArcText = {
             this.createCurvatureControl()
           }
         } else {
-          if(this.curvature){
-            delete this.controls.c
-          }
+          // if(this.curvature){
+          //   delete this.controls.c
+          // }
           this._translate(0, 0)
           this._translatedY = 0
           this._translatedX = 0
@@ -652,4 +670,4 @@ export const FmArcText = {
       }
     }
   }
-} 
+}

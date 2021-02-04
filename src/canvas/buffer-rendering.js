@@ -57,9 +57,9 @@ export const FmBufferRendering = {
 					}
 					matrix = matrix.scale(1/obj.scaleX,1/obj.scaleY)
 
-					if(!obj.canvas.__forExport){
-						matrix = matrix.scale(fabric.devicePixelRatio)
-					}
+					// if(!obj.canvas.__forExport){
+					// 	matrix = matrix.scale(1 / fabric.devicePixelRatio)
+					// }
 
 					obj._tilesPattern.setTransform(matrix)
 					ctx.fillStyle = obj._tilesPattern;

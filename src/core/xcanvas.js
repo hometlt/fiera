@@ -118,6 +118,7 @@ const CanvasMixin = {
         this.processing = true;
         this.editor = options.editor
         this.id = options.id || fabric.util.createID(this)
+        this.editor.fire("entity:created", {target: this, options: options});
         fabric.util.fire("entity:created", {target: this, options: options});
         delete options.id
         delete options.editor

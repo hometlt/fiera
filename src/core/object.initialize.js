@@ -168,7 +168,7 @@ export const FmInitialize = {
           for (let key in this.defaultOptions) if (options[key] === undefined) options[key] = this.defaultOptions[key]
         }
         if(options.editor) {
-          this.editor.fire("entity:load", {options: options});
+          this.editor.fire("entity:created", {target: this, options: options});
         }
 
         fabric.util.fire("entity:created", {target: this, options: options})
@@ -491,6 +491,9 @@ export const FmInitialize = {
         this._setPositionDimensions(options);
       }
     },
-    Polygon: {}
+    Polygon: {
+      "+stateProperties": ["points"],
+      "+storeProperties": ["points"]
+    }
   }
 }

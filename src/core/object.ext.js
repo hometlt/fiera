@@ -388,13 +388,13 @@ export const FmObject = {
           this.canvas.processing = _processing
         }
       },
-      _initEntity (options) {
-        if(options.canvas && !options.editor){
-          options.editor = options.canvas.editor
-        }
-        this.editor = options.editor
-        fabric.util.fire("entity:created", {target: this, options: options})
-      },
+      // _initEntity (options) {
+      //   if(options.canvas && !options.editor){
+      //     options.editor = options.canvas.editor
+      //   }
+      //   this.editor = options.editor
+      //   fabric.util.fire("entity:created", {target: this, options: options})
+      // },
       _normalizeAngle:function(){
         if(this.angle < 0){
           this.angle += 360

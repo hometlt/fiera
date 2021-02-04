@@ -1272,6 +1272,105 @@ Object.assign(fabric.IText.prototype,SyncTextMixin,  {
     this.initBehavior();
   },
 
+  /**
+   * Handles onInput event
+   * @param {Event} e Event object
+   */
+  onInput: function(e) {
+    var fromPaste = this.fromPaste;
+    this.fromPaste = false;
+    e && e.stopPropagation();
+    if (!this.isEditing) {
+      return;
+    }
+    // decisions about style changes.
+    var nextText = this._splitTextIntoLines(this.hiddenTextarea.value).graphemeText,
+        charCount = this._text.length,
+        nextCharCount = nextText.length,
+        removedText, insertedText,
+        charDiff = nextCharCount - charCount,
+        selectionStart = this.selectionStart, selectionEnd = this.selectionEnd,
+        selection = selectionStart !== selectionEnd,
+        copiedStyle, removeFrom, removeTo;
+    if (this.hiddenTextarea.value === '') {
+
+      //modified
+      if(this.styles && this.styles[0] && this.styles[0][0]){
+        this.styles = {0: {0: Object.assign({},this.styles[0][0])}}
+      }
+      else{
+        this.styles = { };
+      }
+
+      this.updateFromTextArea();
+      this.fire('changed');
+      if (this.canvas) {
+        this.canvas.fire('text:changed', { target: this });
+        this.canvas.requestRenderAll();
+      }
+      return;
+    }
+
+    var textareaSelection = this.fromStringToGraphemeSelection(
+        this.hiddenTextarea.selectionStart,
+        this.hiddenTextarea.selectionEnd,
+        this.hiddenTextarea.value
+    );
+    var backDelete = selectionStart > textareaSelection.selectionStart;
+    if (selection) {
+      removedText = this._text.slice(selectionStart, selectionEnd);
+      charDiff += selectionEnd - selectionStart;
+    }
+    else if (nextCharCount < charCount) {
+      if (backDelete) {
+        removedText = this._text.slice(selectionEnd + charDiff, selectionEnd);
+      }
+      else {
+        removedText = this._text.slice(selectionStart, selectionStart - charDiff);
+      }
+    }
+    insertedText = nextText.slice(textareaSelection.selectionEnd - charDiff, textareaSelection.selectionEnd);
+    if (removedText && removedText.length) {
+      if (insertedText.length) {
+        // let's copy some style before deleting.
+        // we want to copy the style before the cursor OR the style at the cursor if selection
+        // is bigger than 0.
+        copiedStyle = this.getSelectionStyles(selectionStart, selectionStart + 1, false);
+        // now duplicate the style one for each inserted text.
+        copiedStyle = insertedText.map(function() {
+          // this return an array of references, but that is fine since we are
+          // copying the style later.
+          return copiedStyle[0];
+        });
+      }
+      if (selection) {
+        removeFrom = selectionStart;
+        removeTo = selectionEnd;
+      }
+      else if (backDelete) {
+        // detect differencies between forwardDelete and backDelete
+        removeFrom = selectionEnd - removedText.length;
+        removeTo = selectionEnd;
+      }
+      else {
+        removeFrom = selectionEnd;
+        removeTo = selectionEnd + removedText.length;
+      }
+      this.removeStyleFromTo(removeFrom, removeTo);
+    }
+    if (insertedText.length) {
+      if (fromPaste && insertedText.join('') === fabric.copiedText && !fabric.disableStyleCopyPaste) {
+        copiedStyle = fabric.copiedTextStyle;
+      }
+      this.insertNewStyleBlock(insertedText, selectionStart, copiedStyle);
+    }
+    this.updateFromTextArea();
+    this.fire('changed');
+    if (this.canvas) {
+      this.canvas.fire('text:changed', { target: this });
+      this.canvas.requestRenderAll();
+    }
+  },
 
   /**
    * Handles keyup event

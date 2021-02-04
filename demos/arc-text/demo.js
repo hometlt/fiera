@@ -15,6 +15,8 @@ import {FmOuterCanvas}  	from '../../src/canvas/outer-canvas.js'
 import {FmGoogleFonts} 		from '../../src/fonts/googleFonts.js'
 import {FmStates} 			from '../../src/core/states.js';
 import {FmObservable} 		from '../../src/core/event-listeners.js';
+import {uploadDialog} from "../../src/util/uploader.js";
+import {readFileAsText} from "../../plugins/blob-buffers-utils.js";
 
 // import {FmTransformations}  from '../../src/modules/transformations.js';
 
@@ -241,6 +243,7 @@ let fontsArray = [
 ]
 
 const boundingBoxTest = {
+	detectCollisions: true,
 		contourStrokeWidth: 0.5,
 		contourStroke: "blue",
 		backgroundColor: "rgba(0,0,255,0.05)",
@@ -261,18 +264,19 @@ const boundingBoxTest = {
 	}
 
 const boundingBoxTestObjects = {
-	// Roboto: {
-	// 	type: 'i-text',
-	// 	text: "Roboto",
-	// 	fontFamily: 'Roboto',
-	// 	textBackgroundColor: '#ee7dff44',
-	// 	movementLimits: "canvas",
-	// 	top: 0,
-	// 	scaleX: 1,
-	// 	scaleY: 1,
-	// 	left: 100,
-	// 	fontSize: 100
-	// },
+	Roboto: {
+		backgroundColor: "yellow",
+		type: 'i-text',
+		text: "Roboto",
+		fontFamily: 'Roboto',
+		textBackgroundColor: '#ee7dff44',
+		movementLimits: "canvas",
+		top: 0,
+		scaleX: 1,
+		scaleY: 1,
+		left: 100,
+		fontSize: 50
+	},
 	Sacrament: {
 		backgroundColor: "yellow",
 		type: 'i-text',
@@ -305,36 +309,6 @@ const boundingBoxTestObjects = {
 		top: 200,
 		left: 100,
 		fontSize: 50
-	},
-	MrDafoe100: {
-		backgroundColor: "yellow",
-		type: 'i-text',
-		text: "Mr Dafoe",
-		fontFamily: 'Mr Dafoe',
-		textBackgroundColor: '#ee7dff44',
-		top: 200,
-		left: 400,
-		fontSize: 50,
-		styles: {
-			0: setStyles(
-				{start: 3, end: 8, styles: {fontSize: 100}},
-			)
-		}
-	},
-	MrDafoe25: {
-		backgroundColor: "yellow",
-		type: 'i-text',
-		text: "Mr Dafoe",
-		fontFamily: 'Mr Dafoe',
-		fontSize: 50,
-		textBackgroundColor: '#ee7dff44',
-		top: 500,
-		left: 400,
-		styles: {
-			0: setStyles(
-				{start: 3, end: 8, styles: {fontSize: 25}},
-			)
-		}
 	},
 	Playbox: {
 		backgroundColor: "yellow",
@@ -503,17 +477,73 @@ const curvedObjects = {
 	}
 }
 
+
+let style = {
+	"fill": "#3c3c40",
+	"fontSize": 185.50700378,
+	"fontFamily": "Bungee Inline",
+	"fontWeight": 400
+}
+const stylesTest = {
+	"type": "i-text",
+	"puzzleSpacing": 0,
+	"textLines": [5, 6, 5],
+	"top": 1,
+	"left": 1,
+	"width": 832,
+	"height": 694,
+	"scaleX": 1,
+	"scaleY": 1,
+	"fontFamily": "Leckerli One",
+	"fontSize": 16,
+	"text": "Grand\nSummer\nparty",
+	"styles": {
+		"0": setStyles({start: 0, end: 4, styles: style}),
+		"1": setStyles({start: 0, end: 5, styles: style}),
+		"2": setStyles({start: 0, end: 4, styles: style}),
+	}
+}
+
 const MrDafoeTest = [
 	boundingBoxTestObjects.MrDafoe,
-	boundingBoxTestObjects.MrDafoe100,
-	boundingBoxTestObjects.MrDafoe25,
+	 {
+		 backgroundColor: "yellow",
+		 type: 'i-text',
+		 text: "Mr Dafoe",
+		 fontFamily: 'Mr Dafoe',
+		 textBackgroundColor: '#ee7dff44',
+		 top: 200,
+		 left: 400,
+		 fontSize: 50,
+		 styles: {
+			 0: setStyles(
+				 {start: 3, end: 8, styles: {fontSize: 100}},
+			 )
+		 }
+	 },
+	{
+		backgroundColor: "yellow",
+		type: 'i-text',
+		text: "Mr Dafoe",
+		fontFamily: 'Mr Dafoe',
+		fontSize: 50,
+		textBackgroundColor: '#ee7dff44',
+		top: 500,
+		left: 400,
+		styles: {
+			0: setStyles(
+				{start: 3, end: 8, styles: {fontSize: 25}},
+			)
+		}
+	},
 ]
 
 const elementsList = [
+	{label: "styles Test",value: stylesTest},
 	{label: "❌Advanced BBox Test",value: boundingBoxTest},
 	{label: "❌FontSize Test",value: MrDafoeTest},
 	{label: "Various BBox",value:Object.values(boundingBoxTestObjects)},
-	{label: "Curving",value: Object.values(curvedObjects)},
+	{label: "❌Curving",value: Object.values(curvedObjects)},
 	{label: "Fonts",value: Object.values(fontsTestObjects)},
 	{label: "❌Kerning",value: [
 			{
@@ -694,57 +724,60 @@ createTools({
 	]
 })
 
-createObjects(boundingBoxTest)
+// createObjects(boundingBoxTest)
 
 canvas.on("$activeobject.moving $activeobject.rotating $activeobject.scaling $activeobject.changed", (event) => {
-	let bbox = target.getBoundingRect()
-	if(bbox.left < 0 || bbox.top < 0 || bbox.left + bbox.width > canvas.width || bbox.top + bbox.height > canvas.height){
+	if(target.detectCollisions){
+		let bbox = target.getBoundingRect()
+		if(bbox.left < 0 || bbox.top < 0 || bbox.left + bbox.width > canvas.width || bbox.top + bbox.height > canvas.height){
 
-		let finalMatrix = target.calcOwnMatrix()
+			let finalMatrix = target.calcOwnMatrix()
 
-		let intersections = false
-		for(let i =0; i< target._charTransformations.length; i++) {
-			let row = target._charTransformations[i]
-			for (let j =0; j < row.length - 1; j++) {
-				let oX = target._contentOffsetX, oY = target._contentOffsetY
-				let cc = row[j].contour
-				if(cc){
-					let tl = fabric.util.transformPoint({x: cc.tl.x - oX, y: cc.tl.y - oY}, finalMatrix),
-						tr = fabric.util.transformPoint({x: cc.tr.x - oX, y: cc.tr.y - oY}, finalMatrix),
-						bl = fabric.util.transformPoint({x: cc.bl.x - oX, y: cc.bl.y - oY}, finalMatrix),
-						br = fabric.util.transformPoint({x: cc.br.x - oX, y: cc.br.y - oY}, finalMatrix)
+			let intersections = false
+			for(let i =0; i< target._charTransformations.length; i++) {
+				let row = target._charTransformations[i]
+				for (let j =0; j < row.length - 1; j++) {
+					let oX = target._contentOffsetX, oY = target._contentOffsetY
+					let cc = row[j].contour
+					if(cc){
+						let tl = fabric.util.transformPoint({x: cc.tl.x - oX, y: cc.tl.y - oY}, finalMatrix),
+							tr = fabric.util.transformPoint({x: cc.tr.x - oX, y: cc.tr.y - oY}, finalMatrix),
+							bl = fabric.util.transformPoint({x: cc.bl.x - oX, y: cc.bl.y - oY}, finalMatrix),
+							br = fabric.util.transformPoint({x: cc.br.x - oX, y: cc.br.y - oY}, finalMatrix)
 
-					if (tl.x < 0 || tr.x < 0 || br.x < 0 || bl.x < 0 ||
-						tl.y < 0 || tr.y < 0 || br.y < 0 || bl.y < 0 ||
-						tl.x > canvas.width || tr.x > canvas.width || br.x > canvas.width || bl.x > canvas.width ||
-						tl.y > canvas.height || tr.y > canvas.height || br.y > canvas.height || bl.y > canvas.height) {
-						intersections = true
-						if(target.styles?.[i]?.[j]?.contourStroke !== "red"){
-							let pos = target.get1DCursorLocation(i,j)
-							target.setStyleInterval("contourStroke","red",pos,pos+1)
+						if (tl.x < 0 || tr.x < 0 || br.x < 0 || bl.x < 0 ||
+							tl.y < 0 || tr.y < 0 || br.y < 0 || bl.y < 0 ||
+							tl.x > canvas.width || tr.x > canvas.width || br.x > canvas.width || bl.x > canvas.width ||
+							tl.y > canvas.height || tr.y > canvas.height || br.y > canvas.height || bl.y > canvas.height) {
+							intersections = true
+							if(target.styles?.[i]?.[j]?.contourStroke !== "red"){
+								let pos = target.get1DCursorLocation(i,j)
+								target.setStyleInterval("contourStroke","red",pos,pos+1)
+							}
 						}
-					}
-					else{
-						if(target.styles?.[i]?.[j]?.contourStroke !== "blue"){
-							let pos = target.get1DCursorLocation(i,j)
-							target.setStyleInterval("contourStroke","blue",pos,pos+1)
+						else{
+							if(target.styles?.[i]?.[j]?.contourStroke !== "blue"){
+								let pos = target.get1DCursorLocation(i,j)
+								target.setStyleInterval("contourStroke","blue",pos,pos+1)
+							}
 						}
 					}
 				}
 			}
-		}
 
-		target.__outside = true
-		target.backgroundStroke = {stroke : intersections ? "red" : "yellow", strokeWidth: 1}
-		target.dirty = true;
-
-	}
-	else{
-		if(target.__outside) {
-			target.__outside = false
-			target.backgroundStroke = {stroke: "blue", strokeWidth: 1}
+			target.__outside = true
+			target.backgroundStroke = {stroke : intersections ? "red" : "yellow", strokeWidth: 1}
 			target.dirty = true;
-			target.setStyle("contourStroke","blue")
+
+		}
+		else{
+			if(target.__outside) {
+				target.__outside = false
+				target.backgroundStroke = {stroke: "blue", strokeWidth: 1}
+				target.dirty = true;
+				target.setStyle("contourStroke","blue")
+			}
 		}
 	}
+
 })
