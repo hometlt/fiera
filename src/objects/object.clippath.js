@@ -174,7 +174,7 @@ export const FmCLipPath = {
           }
         }
 
-        if(clipPath.constructor === Object){
+        if(clipPath.constructor === Object) {
           clipPath = Object.assign({},clipPath);
           if (!clipPath.offsets) delete clipPath.offsets;
           if(!clipPath.units){

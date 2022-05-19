@@ -120,7 +120,7 @@ App.create({
                 "puzzle": {"offsetsX": [{"x": 1, "y": 0.5}, {"x": 1, "y": -0.5}]},
                 "puzzleSpacing": 0,
                 "clipPath": {},
-                "src": "metup.png",
+                "src": "m2.jpg",
                 "crop": {"top": 0, "left": 0},
                 "top": -1000,
                 "left": -1000,
@@ -176,7 +176,7 @@ App.create({
             "sourceCanvas": {
                 "objects": [{
                     "type": "photo-image",
-                    src: "metup.png",
+                    src: "m2.jpg",
                     "top": 0,
                     "left": 0,
                     "width": 500,
@@ -234,16 +234,14 @@ App.create({
             height: 1000
         },
         metup: {
-            src: "metup.png",
+            src: "m2.jpg",
             type: "photo-image",
             width: 500,
             height: 750
         },
-        birthday: {
-            scaleX: 0.2,
-            scaleY: 0.2,
-            src: "textures/birthday2.png",
-            type: "image",
+        itext: {
+            text: "textures birthday2",
+            type: "i-text",
             width: 500,
             height: 500
         },
@@ -304,7 +302,7 @@ App.create({
                 //     scaleX: 0.5,
                 //     scaleY: 0.5,
                 //     angle: 4,
-                //     src: "photos/metup.png",
+                //     src: "photos/m2.jpg",
                 //     type: "image",
                 //     left: -500,
                 //     top: -250,
@@ -435,7 +433,8 @@ App.create({
             resizable: true,
             fitting: "cover",
             clipPathFitting: "fit",
-            sourceRoot: fabric.mediaRoot + "photos/"
+            // sourceRoot: fabric.mediaRoot + "photos/"
+            sourceRoot: "/fiera/media/photos/"
             // thumbnailSourceRoot: fabric.mediaRoot + "media-thumbnails/",
         },
         // PhotoImage: {
@@ -563,6 +562,24 @@ App.create({
                     label: 'PNG',
                     type: 'button',
                     click: App.renderPNG
+                }
+            ]
+        },
+        {
+            caption: 'History',
+            type: 'group',
+            tools: [
+                {
+                    label: 'Undo',
+                    type: 'button',
+                    // enabled: () => App.editor.canUndo(),
+                    click: () => App.editor.undo()
+                },
+                {
+                    label: 'Redo',
+                    type: 'button',
+                    // enabled: () => App.editor.canRedo(),
+                    click: () => App.editor.redo()
                 }
             ]
         }

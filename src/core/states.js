@@ -175,7 +175,27 @@ export const FmStates = {
 				let original = this.originalState
 				let modified = this.getProperties(Object.keys(this.originalState))
 
+				for(let property in original) {
+					if(original[property] === modified[property]){
+						delete original[property];
+						delete modified[property];
+					}
+					else if(original[property].constructor === Object || modified[property].constructor === Array) {
+						if(JSON.stringify(original[property]) === JSON.stringify(modified[property])){
+							delete original[property];
+							delete modified[property];
+						}
+					}
+				}
+
+				isModified = Object.keys(this.originalState).length > 0;
+
 				this.originalState = null
+
+				if(!isModified){
+					return;
+				}
+
 
 				let groupNeedsUpdate = this.group && this.group.isOnACache();
 				let cachePropertiesIncludes = false

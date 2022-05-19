@@ -1053,14 +1053,12 @@ Object.assign(fabric.Text.prototype, SyncTextMixin, {
   },
   storeProperties: ["type", "clipPath","frame","deco",'textLines','textTransform'],
   eventListeners: {
-    changed: function(e) {
-      this.updateState();
-      // this.fire("modified", {});
-      // if (this.canvas) {
-      //   this.canvas.fire("object:modified", {target: this});
-      //   this.canvas.renderAll();
-      // }
+    'editing:entered': function() {
+      this.saveStates(["text","styles"]);
     },
+    'editing:exited': function () {
+      this.updateState();
+    }
   },
 
   textCase: "none",

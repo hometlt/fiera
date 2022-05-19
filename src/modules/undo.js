@@ -21,6 +21,26 @@ function _getDifference(a, b) {
 export const FmUndo = {
   name: "undo",
   prototypes: {
+    IText: {
+      /**
+       * For functionalities on keyUp + ctrl || cmd
+       */
+      ctrlKeysMapUp: {
+        67: 'copy',
+        88: 'cut',
+        // 90: 'disableUndo'
+      },
+      /**
+       * For functionalities on keyDown + ctrl || cmd
+       */
+      ctrlKeysMapDown: {
+        65: 'selectAll',
+        // 90: 'disableUndo'
+      },
+      // disableUndo(e) {
+      //   e.preventDefault();
+      // }
+    },
     Canvas: {
       _restoreGroup (object,objectsStates){
         if(this._activeObject !== object){
@@ -94,8 +114,6 @@ export const FmUndo = {
       //     }
       //   });
       // },
-
-
       //source: https://stackoverflow.com/a/29574724/6798201
       //assuming "b" contains a subsequence containing
       //all of the letters in "a" in the same order
@@ -329,7 +347,7 @@ export const FmUndo = {
 
         this.on({
           'modified':         this.onCanvasModified,
-          'loading:before':    this.clearHistory,
+          'loading:before':   this.clearHistory,
           'draw:after':       this.onDrawAfter,
           'object:modified':  this.onObjectModified,
           'object:added':     this.onObjectAdded,
