@@ -20,7 +20,8 @@ export const FmCrop = {
 
         ctx.restore();
         ctx.save();
-        ctx.scale(this.canvas.viewportTransform[0],this.canvas.viewportTransform[3])
+        ctx.transform.apply(ctx, this.canvas.viewportTransform);
+       // ctx.scale(this.canvas.viewportTransform[0],this.canvas.viewportTransform[3])
         ctx.globalAlpha = this.opacity;
         let m = this.calcOwnMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);

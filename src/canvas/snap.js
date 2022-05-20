@@ -91,8 +91,7 @@ export const FmSnap = {
           }
         }
         if (result) {
-          result.distance = Math.abs(Math.round((result.dx && result.dy && Math.min(Math.abs(result.dx), Math.abs(result.dy)))
-            || result.dx || result.dy))
+          result.distance = Math.abs(Math.round((result.dx && result.dy && Math.min(Math.abs(result.dx), Math.abs(result.dy))) || result.dx || result.dy))
         }
         return result
       },
@@ -253,59 +252,59 @@ export const FmSnap = {
       },
 
 
-      /**
-       * Draw Helper lines For Snapping function
-       * @param {SnapToResult} snapResult
-       * @param strokeStyle
-       */
-      renderSnapping: function (snapResult, strokeStyle) {
-        // if(this._currentTransform && snapResult){
-        //   this.clearContext(ctx)
-        // }
-        // let options = fabric.util.qrDecompose(v)
-        let ctx = this.contextTop, v = this.viewportTransform
-        let scale = v[0]
+        /**
+         * Draw Helper lines For Snapping function
+         * @param {SnapToResult} snapResult
+         * @param strokeStyle
+         */
+        renderSnapping: function (snapResult, strokeStyle) {
+          // if(this._currentTransform && snapResult){
+          //   this.clearContext(ctx)
+          // }
+          // let options = fabric.util.qrDecompose(v)
+          let ctx = this.contextTop, v = this.viewportTransform
+          let scale = v[0]
 
-        ctx.save()
-        ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5])
-        ctx.lineWidth = 1 / scale
-        ctx.strokeStyle = strokeStyle
-        fabric.Path.prototype._setLineDash(ctx, [5 / scale, 5 / scale], fabric.Path.prototype._renderDashedStroke)
+          ctx.save()
+          ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5])
+          ctx.lineWidth = 1 / scale
+          ctx.strokeStyle = strokeStyle
+          fabric.Path.prototype._setLineDash(ctx, [5 / scale, 5 / scale], fabric.Path.prototype._renderDashedStroke)
 
-        // ctx.translate(options.translateX, options.translateY)
+          // ctx.translate(options.translateX, options.translateY)
 
-        function drawSnapObject(obj) {
-          if (!obj || !obj.points) return
-          let p = obj.points
-          let lastPoint = p[0]
-          ctx.moveTo(p[0].x, p[0].y)
-          for (let i = p.length; i--;) {
-            // fabric.util.drawDashedLine(ctx, lastPoint.x, lastPoint.y, p[i].x, p[i].y, [5 / scale,5 / scale ])
-            ctx.lineTo(p[i].x, p[i].y)
-            lastPoint = p[i]
+          function drawSnapObject(obj) {
+            if (!obj || !obj.points) return
+            let p = obj.points
+            let lastPoint = p[0]
+            ctx.moveTo(p[0].x, p[0].y)
+            for (let i = p.length; i--;) {
+              // fabric.util.drawDashedLine(ctx, lastPoint.x, lastPoint.y, p[i].x, p[i].y, [5 / scale,5 / scale ])
+              ctx.lineTo(p[i].x, p[i].y)
+              lastPoint = p[i]
+            }
           }
-        }
 
-        ctx.beginPath()
-        drawSnapObject(snapResult.object)
-        drawSnapObject(snapResult.objectX)
-        drawSnapObject(snapResult.objectY)
-        drawSnapObject(this.__snapCache.target)
-        if (snapResult.object) {
-          ctx.moveTo(snapResult.tx, snapResult.ty)
-          ctx.lineTo(snapResult.x, snapResult.y)
-          ctx.arc(snapResult.x, snapResult.y, 2, 0, 2 * Math.PI)
-        }
-        if (snapResult.objectX) {
-          ctx.moveTo(snapResult.x, -v[5] / v[3])
-          ctx.lineTo(snapResult.x, this.height / v[3])
-        }
-        if (snapResult.objectY) {
-          ctx.moveTo(-v[4] / v[0], snapResult.y)
-          ctx.lineTo(this.width / v[0], snapResult.y)
-        }
-        ctx.stroke()
-        ctx.restore()
+          ctx.beginPath()
+          drawSnapObject(snapResult.object)
+          drawSnapObject(snapResult.objectX)
+          drawSnapObject(snapResult.objectY)
+          drawSnapObject(this.__snapCache.target)
+          if (snapResult.object) {
+            ctx.moveTo(snapResult.tx, snapResult.ty)
+            ctx.lineTo(snapResult.x, snapResult.y)
+            ctx.arc(snapResult.x, snapResult.y, 2, 0, 2 * Math.PI)
+          }
+          if (snapResult.objectX) {
+            ctx.moveTo(snapResult.x, -v[5] / v[3])
+            ctx.lineTo(snapResult.x, this.height / v[3])
+          }
+          if (snapResult.objectY) {
+            ctx.moveTo(-v[4] / v[0], snapResult.y)
+            ctx.lineTo(this.width / v[0], snapResult.y)
+          }
+          ctx.stroke()
+          ctx.restore()
       },
       /**
        * Correct Object moving on "object:moving" event

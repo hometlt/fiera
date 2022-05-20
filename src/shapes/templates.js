@@ -18,6 +18,7 @@ export const FmTemplates = {
 			selectable: false
 		},
 		TemplateTextbox: {
+			draggable: false,
 			prototype: "Textbox",
 			easyEdit: true,
 			tabbable: true,
@@ -28,6 +29,7 @@ export const FmTemplates = {
 			lockRotation: true
 		},
 		TemplateIText: {
+			draggable: false,
 			prototype: "IText",
 			hasControls: false,
 			easyEdit: true,

@@ -417,7 +417,7 @@ Object.assign(fabric.Canvas.prototype, {
           }
           this._setupCurrentTransform(e, target, alreadySelected || target.active);
         }
-        else if(!target.isEditing && !shouldGroup) {
+        else if(!target.isEditing && !shouldGroup && target.draggable) {
           this._setupCurrentTransform(e, target, alreadySelected || target.active);
         }
       }

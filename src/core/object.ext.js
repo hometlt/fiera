@@ -10,6 +10,7 @@ export const FmObject = {
     Object: {
       id: null,
       storeProperties: ["type"],
+      draggable: true,
       useSuperClassStoreProperties: true,
       stored: true,
       clonedProperties: ["editor","type","_clipPath","clipPath"],
