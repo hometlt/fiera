@@ -1,9 +1,9 @@
-import {TestApp} from '../showreel.js'
-import '../../src/fonts/fonts.js'
-import {Warp,Controls} from '../../src/modules.js'
+import {App} from '../showreel.js'
+import '../../../src/fonts/fonts.js'
+import {FmWarp,FmControls} from '../../../src/modules.js'
 
-new TestApp({
-	plugins: [Warp, Controls],
+new App({
+	plugins: [FmWarp,FmControls],
 	prototypes: {
 		Object: {
 			// active: true
