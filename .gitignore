@@ -3,3 +3,5 @@ node_modules
 /fonts/google/*
 /demos/nymbl-render/js/**
 /demos/arc-text/js/**
+/media/**
+.idea
