@@ -66,7 +66,7 @@
     "fontkit": "1.8.1",
     "gl": "4.8.0",
     "image-type": "4.1.0",
-    "jsdom": "16.4.0",
+    "jsdom": "16.5.0",
     "linebreak": "1.0.2",
     "png-js": "1.0.0",
     "pngjs": "6.0.0"
